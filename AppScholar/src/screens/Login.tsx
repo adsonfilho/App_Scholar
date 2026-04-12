@@ -23,7 +23,9 @@ export const Login = ({ navigation }: any) => {
 
     showStatus("Bem-vindo ao App Scholar!", "success");
 
-    console.log("Login realizado com sucesso!");
+    setTimeout(() => {
+      navigation.navigate('Dashboard');
+    }, 800);
   };
 
   return (
@@ -35,7 +37,7 @@ export const Login = ({ navigation }: any) => {
       />
 
       <Text style={TitleStyle.h1}>
-        <div style={TitleStyle.highlight}>App Scholar</div>
+        <Text style={TitleStyle.highlight}>App Scholar</Text>
       </Text>
       
       <TextInput

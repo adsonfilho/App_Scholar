@@ -6,7 +6,10 @@ export const LoginStyle = StyleSheet.create({
     flex: 1, 
     justifyContent: 'center', 
     padding: 20,
-    backgroundColor: '#fff' 
+    backgroundColor: '#F2F2F7',
+    maxWidth: 1280,
+    alignSelf: 'center',
+    width: '100%'
   },
   input: {
     borderWidth: 1,
