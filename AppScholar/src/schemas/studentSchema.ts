@@ -25,6 +25,7 @@ export const STUDENT_INITIAL_STATE: IStudent = {
   telefone: '',
   cep: '', 
   endereco: '', 
+  numero: '',
   bairro: '',
   cidade: '', 
   estado: ''
