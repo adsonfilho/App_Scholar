@@ -5,6 +5,7 @@ import { StatusMessage } from '../components/StatusMessage';
 import { loginSchema } from '../schemas/authSchema'; 
 import { LoginStyle } from '../styles/LoginStyle';
 import { TitleStyle } from '../styles/TitleStyle';
+import { UI_SETTINGS } from '../config/config';
 
 export const Login = ({ navigation }: any) => {
   const [email, setEmail] = useState('');
@@ -25,7 +26,7 @@ export const Login = ({ navigation }: any) => {
 
     setTimeout(() => {
       navigation.navigate('Dashboard');
-    }, 800);
+    }, UI_SETTINGS.LOAD_SIMULATION_TIME);
   };
 
   return (

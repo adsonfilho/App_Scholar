@@ -3,6 +3,7 @@ import { View, Text, FlatList, TouchableOpacity, TextInput, Alert, Platform, Key
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StudentListStyle } from '../styles/StudentStyle';
+import { STUDENT_INITIAL_STATE } from '../schemas/studentSchema';
 
 export const StudentList = ({ navigation }: any) => {
   const [search, setSearch] = useState('');
@@ -75,7 +76,7 @@ export const StudentList = ({ navigation }: any) => {
             <View style={StudentListStyle.actions}>
               <TouchableOpacity 
                 style={[StudentListStyle.actionBtn, StudentListStyle.editBtn]}
-                onPress={() => navigation.navigate('RegisterStudent', { student: item })}
+                onPress={() => navigation.navigate('RegisterStudent', { student: { ...STUDENT_INITIAL_STATE, ...item } })}
               >
                 <Ionicons name="pencil" size={18} color="#007AFF" />
               </TouchableOpacity>

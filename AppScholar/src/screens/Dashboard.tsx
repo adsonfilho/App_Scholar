@@ -48,7 +48,7 @@ export const Dashboard = ({ navigation }: any) => {
               description="Gerencie a equipe docente, suas formações acadêmicas e áreas de atuação." 
               iconName="briefcase-outline" 
               iconColor="#5856D6"
-              onPress={() => navigation.navigate('RegisterTeacher')}
+              onPress={() => navigation.navigate('Teacher')}
             />
 
             <MenuItem 
@@ -56,7 +56,7 @@ export const Dashboard = ({ navigation }: any) => {
               description="Organize as matérias do semestre, horários e quem será o professor responsável." 
               iconName="book-outline" 
               iconColor="#FF9500"
-              onPress={() => navigation.navigate('RegisterSubject')}
+              onPress={() => navigation.navigate('Course')}
             />
 
             <MenuItem 
@@ -64,7 +64,7 @@ export const Dashboard = ({ navigation }: any) => {
               description="Acompanhe notas e médias para conferir o desempenho e a situação final." 
               iconName="stats-chart-outline" 
               iconColor="#34C759"
-              onPress={() => navigation.navigate('Grades')}
+              onPress={() => navigation.navigate('StudentReport')}
             />
 
           </View>
