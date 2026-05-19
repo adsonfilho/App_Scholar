@@ -1,0 +1,27 @@
+{
+  "compilerOptions": {
+    /* Configurações Principais */
+    "target": "ESNext",
+    "module": "CommonJS",                      // Permite rodar sem o "type": "module" no package.json
+    "moduleResolution": "node",                // Resolve imports sem precisar de extensões
+    "outDir": "./dist",                        // Onde o npm run build vai salvar os arquivos
+    "rootDir": "./src",                        // Onde está seu código fonte
+    "lib": ["ESNext"],
+    "types": ["node"],
+
+    /* Integração e Compatibilidade */
+    "esModuleInterop": true,                   // Permite importar pacotes CommonJS (como Express) usando 'import'
+    "forceConsistentCasingInFileNames": true,
+    "isolatedModules": true,
+    "skipLibCheck": true,                      // Ignora erros de tipos dentro de node_modules
+
+    /* Rigor do TypeScript */
+    "strict": true,                            // Ativa checagem rigorosa (importante para nota acadêmica)
+    "noUncheckedIndexedAccess": true,
+    "declaration": true,
+    "sourceMap": true,
+    "ignoreDeprecations": "6.0"                        // Ajuda a debugar erros apontando para o arquivo .ts e não o .js
+  },
+  "include": ["src/**/*"],                     // Inclui todos os arquivos da pasta src
+  "exclude": ["node_modules", "dist"]          // Ignora o que não deve ser compilado
+}

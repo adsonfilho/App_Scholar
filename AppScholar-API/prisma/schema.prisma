@@ -1,0 +1,97 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  ADMIN
+  TEACHER
+  STUDENT
+}
+
+enum Situation {
+  PASSED
+  FAILED
+}
+
+model User {
+  id        Int        @id @default(autoincrement())
+  name      String
+  email     String     @unique
+  password  String
+  role      Role
+  student   Student?
+  professor Professor?
+
+  @@map("users")
+}
+
+model Student {
+  id         Int      @id @default(autoincrement())
+  enrollment String   @unique 
+  course     String
+  phone      String
+  zipCode    String   
+  address    String   
+  city       String
+  state      String
+
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId     Int      @unique
+
+  grades     Grade[]
+  @@map("students")
+}
+
+model Professor {
+  id                 Int       @id @default(autoincrement())
+  degree             String   
+  field              String    
+  teachingExperience Int       
+  
+  user               User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId             Int       @unique
+
+  subjects           Subject[] 
+  @@map("professors")
+}
+
+model Subject {
+  id          Int       @id @default(autoincrement())
+  name        String
+  workload    Int       
+  semester    Int
+  program     String    
+  
+  professorId Int       
+  professor   Professor @relation(fields: [professorId], references: [id], onDelete: Cascade)
+  
+  grades      Grade[]
+  @@map("subjects")
+}
+
+model Grade {
+  id          Int       @id @default(autoincrement())
+  
+  studentId   Int       
+  student     Student   @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  subjectId   Int       
+  subject     Subject   @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+
+  grade1      Float     
+  grade2      Float     
+  average     Float     
+  situation   Situation 
+
+  @@map("grades")
+}
