@@ -22,6 +22,6 @@
     "sourceMap": true,
     "ignoreDeprecations": "6.0"                        // Ajuda a debugar erros apontando para o arquivo .ts e não o .js
   },
-  "include": ["src/**/*"],                     // Inclui todos os arquivos da pasta src
+  "include": ["src/**/*", "prisma.config.ts"],                     // Inclui todos os arquivos da pasta src
   "exclude": ["node_modules", "dist"]          // Ignora o que não deve ser compilado
 }
