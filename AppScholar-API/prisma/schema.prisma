@@ -155,15 +155,14 @@ model Grade {
   @@map("grades")
 }
 
-model PreRegistration {
+model UserInvitation {
   id         Int      @id @default(autoincrement())
   enrollment String   @unique 
   email      String   @unique 
   role       Role     
-  used       Boolean  @default(false)
+  usedAt     DateTime? @map("used_at")
 
   createdAt  DateTime @default(now()) @map("created_at")
-  updatedAt  DateTime @updatedAt      @map("updated_at")
-
-  @@map("pre_registrations")
+  
+  @@map("user_invitations")
 }
