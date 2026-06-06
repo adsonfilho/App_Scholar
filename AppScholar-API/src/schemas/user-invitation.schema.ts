@@ -9,7 +9,11 @@ export const createUserInvitationSchema = z.object({
   email: z
     .email('E-mail inválido'),
 
-  role: z.enum([Role.STUDENT, Role.TEACHER]),
+  role: z.enum([Role.STUDENT, Role.PROFESSOR]),
+
+  courseId: z
+    .int()
+    .min(1, 'ID do curso é obrigatório')
 });
 
 export type CreateUserInvitationDTO = z.infer<typeof createUserInvitationSchema>

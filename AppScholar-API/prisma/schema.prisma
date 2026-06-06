@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -9,160 +6,149 @@ datasource db {
   provider = "postgresql"
 }
 
-enum Role {
-  ADMIN
-  TEACHER
-  STUDENT
-}
-
-enum Situation {
-  PENDING
-  PASSED
-  FAILED
-}
-
 model User {
-  id        Int         @id @default(autoincrement())
+  id        Int        @id @default(autoincrement())
   name      String
-  email     String      @unique
+  email     String     @unique
   password  String
   role      Role
+  createdAt DateTime   @default(now()) @map("created_at")
+  updatedAt DateTime   @updatedAt @map("updated_at")
+  professor Professor?
   student   Student?
-  professor Professor? 
-
-  createdAt DateTime    @default(now()) @map("created_at")
-  updatedAt DateTime    @updatedAt      @map("updated_at")
 
   @@map("users")
 }
 
 model Course {
-  id        Int       @id @default(autoincrement())
-  name      String    @unique 
-  
-  students  Student[]
-  subjects  Subject[]
+  id              Int              @id @default(autoincrement())
+  name            String           @unique
+  coursePeriod    CoursePeriod     @map("course_period")
+  active          Boolean          @default(true)
+  createdAt       DateTime         @default(now()) @map("created_at")
+  updatedAt       DateTime         @updatedAt @map("updated_at")
+  students        Student[]
+  subjects        Subject[]
+  userInvitations UserInvitation[]
 
-  active    Boolean   @default(true)
-
-  createdAt DateTime  @default(now()) @map("created_at")
-  updatedAt DateTime  @updatedAt      @map("updated_at")
   @@map("courses")
 }
 
 model Degree {
   id         Int         @id @default(autoincrement())
-  name       String      @unique 
-  professors Professor[]
-
+  name       String      @unique
   active     Boolean     @default(true)
+  professors Professor[]
 
   @@map("degrees")
 }
 
 model Field {
   id         Int         @id @default(autoincrement())
-  name       String      @unique 
-  professors Professor[]
-
+  name       String      @unique
   active     Boolean     @default(true)
+  professors Professor[]
 
   @@map("fields")
 }
 
 model Student {
   id         Int      @id @default(autoincrement())
-  enrollment String   @unique 
+  enrollment String   @unique
   phone      String
-  zipCode    String   @map("zip_code")
-  address    String   
+  address    String
   city       String
   state      String
-
   courseId   Int      @map("course_id")
-  course     Course   @relation(fields: [courseId], references: [id])
-
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now()) @map("created_at")
+  number     String
+  updatedAt  DateTime @updatedAt @map("updated_at")
   userId     Int      @unique @map("user_id")
-
+  zipCode    String   @map("zip_code")
   grades     Grade[]
-
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt      @map("updated_at")
+  course     Course   @relation(fields: [courseId], references: [id])
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("students")
 }
 
 model Professor {
   id                 Int       @id @default(autoincrement())
-  teachingExperience Int       @map("teaching_experience")
-  
+  createdAt          DateTime  @default(now()) @map("created_at")
   degreeId           Int       @map("degree_id")
-  degree             Degree    @relation(fields: [degreeId], references: [id])
-
   fieldId            Int       @map("field_id")
-  field              Field     @relation(fields: [fieldId], references: [id])
-
-  user               User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  teachingExperience Int       @map("teaching_experience") //Month of teaching experience
+  updatedAt          DateTime  @updatedAt @map("updated_at")
   userId             Int       @unique @map("user_id")
-
-  subjects           Subject[] 
-
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt      @map("updated_at")
+  degree             Degree    @relation(fields: [degreeId], references: [id])
+  field              Field     @relation(fields: [fieldId], references: [id])
+  user               User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subjects           Subject[]
 
   @@map("professors")
 }
 
 model Subject {
   id          Int       @id @default(autoincrement())
-  name        String    
-  workload    Int       
-  semester    Int       
-  
+  name        String
+  workload    Int
+  semester    Int
   courseId    Int       @map("course_id")
-  course      Course    @relation(fields: [courseId], references: [id])
-  
+  createdAt   DateTime  @default(now()) @map("created_at")
   professorId Int       @map("professor_id")
-  professor   Professor @relation(fields: [professorId], references: [id], onDelete: Cascade)
-  
+  updatedAt   DateTime  @updatedAt @map("updated_at")
   grades      Grade[]
-
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt      @map("updated_at")
+  course      Course    @relation(fields: [courseId], references: [id])
+  professor   Professor @relation(fields: [professorId], references: [id], onDelete: Cascade)
 
   @@map("subjects")
 }
 
 model Grade {
-  id          Int        @id @default(autoincrement())
-  
-  studentId   Int        @map("student_id")
-  student     Student    @relation(fields: [studentId], references: [id], onDelete: Cascade)
-
-  subjectId   Int        @map("subject_id")
-  subject     Subject    @relation(fields: [subjectId], references: [id], onDelete: Cascade)
-
-  grade1      Float     
-  grade2      Float?    
-  average     Float?    
-  situation   Situation @default(PENDING) 
-
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt      @map("updated_at")
+  id        Int       @id @default(autoincrement())
+  grade1    Float
+  grade2    Float?
+  average   Float?
+  situation Situation @default(PENDING)
+  createdAt DateTime  @default(now()) @map("created_at")
+  studentId Int       @map("student_id")
+  subjectId Int       @map("subject_id")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  student   Student   @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  subject   Subject   @relation(fields: [subjectId], references: [id], onDelete: Cascade)
 
   @@unique([studentId, subjectId])
   @@map("grades")
 }
 
 model UserInvitation {
-  id         Int      @id @default(autoincrement())
-  enrollment String   @unique 
-  email      String   @unique 
-  role       Role     
+  id         Int       @id @default(autoincrement())
+  enrollment String    @unique
+  email      String    @unique
+  role       Role
+  courseId   Int?      @map("course_id")
   usedAt     DateTime? @map("used_at")
+  createdAt  DateTime  @default(now()) @map("created_at")
+  course     Course?   @relation(fields: [courseId], references: [id])
 
-  createdAt  DateTime @default(now()) @map("created_at")
-  
   @@map("user_invitations")
+}
+
+enum Role {
+  ADMIN
+  PROFESSOR
+  STUDENT
+}
+
+enum Situation {
+  PASSED
+  FAILED
+  PENDING
+}
+
+enum CoursePeriod {
+  MORNING
+  AFTERNOON
+  EVENING
+  FULL_TIME
 }

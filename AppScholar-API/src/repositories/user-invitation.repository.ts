@@ -24,6 +24,32 @@ class UserInvitationRepository{
         });
     }
 
+    public async markAsUsed(id: number): Promise<UserInvitation> {        
+        return prisma.userInvitation.update({
+            where: { id },
+            data: { usedAt: new Date() }
+        });
+    }
+
+    public async findInvitation(email: string, enrollment: string): Promise<UserInvitation | null>{ 
+
+        return prisma.userInvitation.findFirst({
+            where: {
+                enrollment,
+                email
+            }
+        });
+    }
+
+    public async findAll(): Promise<UserInvitation[]>{
+        return prisma.userInvitation.findMany();
+    }
+
+    public async deleteByEmail(email: string): Promise<void>{
+        await prisma.userInvitation.delete({
+            where: { email }
+        });
+    }
 }
 
 export const userInvitationRepository = new UserInvitationRepository()

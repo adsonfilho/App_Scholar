@@ -5,7 +5,7 @@
     "module": "CommonJS",                      // Permite rodar sem o "type": "module" no package.json
     "moduleResolution": "node",                // Resolve imports sem precisar de extensões
     "outDir": "./dist",                        // Onde o npm run build vai salvar os arquivos
-    "rootDir": "./src",                        // Onde está seu código fonte
+    "rootDir": "./",                        // Onde está seu código fonte (inclui arquivos fora de src, ex: prisma.config.ts)
     "lib": ["ESNext"],
     "types": ["node"],
 
