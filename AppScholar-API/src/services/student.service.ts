@@ -17,6 +17,10 @@ class StudentService{
             throw new Error('Este convite já foi utilizado.');
         }
 
+        if (existingInvitation.courseId === null) {
+            throw new Error('Convite inválido: curso não informado.');
+        }
+
         data.courseId = existingInvitation.courseId;
         data.password = await hashPassword(data.password);
 
