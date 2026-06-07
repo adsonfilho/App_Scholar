@@ -1,6 +1,5 @@
 import api from './apiService';
 
-
 class StudentService {
     async getStudents() {
         try {

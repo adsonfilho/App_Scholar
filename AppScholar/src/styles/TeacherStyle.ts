@@ -4,11 +4,11 @@ const HEADER_HEIGHT = 64;
 
 export const TeacherStyle = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F8F9FB' },
-  navHeader: { 
-    flexDirection: 'row', 
-    alignItems: 'center', 
-    justifyContent: 'space-between', 
-    paddingHorizontal: 16, 
+  navHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
     height: HEADER_HEIGHT,
     backgroundColor: '#FFF',
     borderBottomWidth: 1,
@@ -16,12 +16,12 @@ export const TeacherStyle = StyleSheet.create({
   },
   navBtn: { width: 44, height: 44, justifyContent: 'center', alignItems: 'flex-start' },
   navTitle: { fontSize: 18, fontWeight: '700', color: '#1C1C1E', flex: 1, textAlign: 'center' },
-  headerAddBtn: { 
-    width: 40, height: 40, borderRadius: 20, backgroundColor: '#34C759', 
+  headerAddBtn: {
+    width: 40, height: 40, borderRadius: 20, backgroundColor: '#34C759',
     justifyContent: 'center', alignItems: 'center',
-    ...Platform.select({ 
-      ios: { shadowColor: '#34C759', shadowOpacity: 0.3, shadowRadius: 4 }, 
-      android: { elevation: 3 } 
+    ...Platform.select({
+      ios: { shadowColor: '#34C759', shadowOpacity: 0.3, shadowRadius: 4 },
+      android: { elevation: 3 }
     })
   },
   headerSpacer: { width: 44 },
@@ -29,7 +29,7 @@ export const TeacherStyle = StyleSheet.create({
   searchBar: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#F2F2F7', borderRadius: 12, paddingHorizontal: 12, height: 45 },
   searchInput: { flex: 1, marginLeft: 8, fontSize: 16 },
   list: { padding: 20 },
-  card: { 
+  card: {
     backgroundColor: '#FFF', borderRadius: 16, padding: 15, flexDirection: 'row', alignItems: 'center', marginBottom: 12,
     elevation: 2, shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 10
   },
@@ -52,5 +52,69 @@ export const TeacherStyle = StyleSheet.create({
   input: { backgroundColor: '#F2F2F7', borderRadius: 10, padding: 12, fontSize: 16, marginBottom: 12 },
   row: { flexDirection: 'row' },
   saveBtn: { backgroundColor: '#34C759', padding: 18, borderRadius: 15, alignItems: 'center', marginTop: 10 },
-  saveBtnText: { color: '#FFF', fontWeight: 'bold', fontSize: 16 }
+  saveBtnText: { color: '#FFF', fontWeight: 'bold', fontSize: 16 },
+
+  customSelectButton: {
+    backgroundColor: '#FFF',
+    borderWidth: 1,
+    borderColor: '#C7C7CC',
+    borderRadius: 10,
+    paddingHorizontal: 16,
+    height: 50,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 14,
+  },
+  selectButtonText: {
+    fontSize: 16,
+    color: '#1C1C1E',
+  },
+  placeholderText: {
+    fontSize: 16,
+    color: '#636366',
+    fontWeight: '500',
+  },
+
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
+    backgroundColor: '#FFF',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 40,
+    maxHeight: '70%',
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#1C1C1E',
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  modalOption: {
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E5EA',
+    alignItems: 'center',
+  },
+  modalOptionText: {
+    fontSize: 16,
+    color: '#007AFF',
+    fontWeight: '600',
+  },
+  cancelOption: {
+    marginTop: 10,
+    backgroundColor: '#F2F2F7',
+    borderRadius: 10,
+    borderBottomWidth: 0,
+  },
+  cancelOptionText: {
+    color: '#FF3B30',
+  },
 });

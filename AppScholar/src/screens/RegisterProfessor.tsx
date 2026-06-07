@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { View, Text, ScrollView, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, ScrollView, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, ActivityIndicator, Modal } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { TeacherStyle } from '../styles/TeacherStyle';
@@ -7,53 +7,92 @@ import { professorSchema, IProfessor, TEACHER_INITIAL_STATE } from '../schemas/p
 import { StatusMessage } from '../components/StatusMessage';
 import { UI_SETTINGS } from '../config/config';
 import { professorService } from '../services/professorService';
+import api from '../services/apiService';
+
+interface IOption {
+  id: number;
+  name: string;
+  active: boolean;
+}
 
 export const RegisterTeacher = ({ navigation, route }: any) => {
   const editData = route.params?.teacher;
+
   const [form, setForm] = useState<IProfessor>(editData || TEACHER_INITIAL_STATE);
+  const [showPassword, setShowPassword] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [msgType, setMsgType] = useState<'success' | 'error' | 'warning'>('error');
 
-  const handleSave = async () => {
-    const result = professorSchema.safeParse(form);
-    
-    if (!result.success) {
-        setMsgType('error');
-        setMessage(result.error.issues[0].message);
-        setTimeout(() => { setMessage(null);}, UI_SETTINGS.STATUS_DURATION)
-        return;
-    }
+  const [degrees, setDegrees] = useState<IOption[]>([]);
+  const [fields, setFields] = useState<IOption[]>([]);
+  const [loadingOptions, setLoadingOptions] = useState(true);
 
-    if (editData) {
-      const updatedProfessor = await professorService.updateProfessor(editData.id, result.data);
-      if (!updatedProfessor) {
-        setMsgType('error');
-        setMessage("Erro ao salvar alterações. Tente novamente.");
-        setTimeout(() => { setMessage(null);}, UI_SETTINGS.STATUS_DURATION)
-        return;
+  const [selectedDegree, setSelectedDegree] = useState<IOption | null>(null);
+  const [selectedField, setSelectedField] = useState<IOption | null>(null);
+  const [degreeModalVisible, setDegreeModalVisible] = useState(false);
+  const [fieldModalVisible, setFieldModalVisible] = useState(false);
+
+  const showMsg = (msg: string, type: 'success' | 'error' | 'warning') => {
+    setMsgType(type);
+    setMessage(msg);
+    setTimeout(() => setMessage(null), UI_SETTINGS.STATUS_DURATION);
+  };
+
+  useEffect(() => {
+    const loadOptions = async () => {
+      try {
+        const [degreesRes, fieldsRes] = await Promise.all([
+          api.get('/degrees'),
+          api.get('/fields'),
+        ]);
+        setDegrees(degreesRes.data.filter((d: IOption) => d.active));
+        setFields(fieldsRes.data.filter((f: IOption) => f.active));
+
+        // Preenche os selects ao editar
+        if (editData) {
+          const deg = degreesRes.data.find((d: IOption) => d.id === editData.degreeId);
+          const fld = fieldsRes.data.find((f: IOption) => f.id === editData.fieldId);
+          if (deg) setSelectedDegree(deg);
+          if (fld) setSelectedField(fld);
+        }
+      } catch (error) {
+        showMsg('Erro ao carregar opções. Tente novamente.', 'error');
+      } finally {
+        setLoadingOptions(false);
       }
-      setMsgType('success');
-      setMessage("Alterações salvas!");
+    };
+
+    loadOptions();
+  }, []);
+
+  const handleSave = async () => {
+    const dataToValidate = {
+      ...form,
+      role: 'PROFESSOR' as const,
+      degreeId: Number(selectedDegree?.id ?? 0),
+      fieldId: Number(selectedField?.id ?? 0),
+      teachingExperience: Number(form.teachingExperience),
+    };
+
+    const result = professorSchema.safeParse(dataToValidate);
+
+    if (!result.success) {
+      showMsg(result.error.issues[0].message, 'error');
+      return;
+    }
+
+    try {
+      if (editData) {
+        await professorService.updateProfessor(editData.id, result.data);
+        showMsg('Alterações salvas!', 'success');
+      } else {
+        await professorService.createProfessor(result.data);
+        showMsg('Professor cadastrado com sucesso!', 'success');
+      }
       setTimeout(() => { setMessage(null); navigation.goBack(); }, UI_SETTINGS.LOAD_SIMULATION_TIME);
-      return;
+    } catch (error: any) {
+      showMsg(error?.response?.data?.message || error?.message || 'Erro ao salvar professor.', 'error');
     }
-
-    const newProfessor = await professorService.createProfessor(result.data);
-
-    if (!newProfessor) {
-      setMsgType('error');
-      setMessage("Erro ao salvar professor. Tente novamente.");
-      setTimeout(() => { setMessage(null);}, UI_SETTINGS.STATUS_DURATION)
-      return;
-    }
-
-    setMsgType('success');
-    setMessage(editData ? "Alterações salvas!" : "Professor cadastrado com sucesso!");
-    
-    setTimeout(() => { 
-      setMessage(null); 
-      navigation.goBack(); 
-    }, UI_SETTINGS.LOAD_SIMULATION_TIME);
   };
 
   return (
@@ -68,89 +107,177 @@ export const RegisterTeacher = ({ navigation, route }: any) => {
 
       <StatusMessage message={message} type={msgType} onClose={() => setMessage(null)} />
 
-      <KeyboardAvoidingView 
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined} 
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         style={{ flex: 1 }}
       >
-        <ScrollView 
-          contentContainerStyle={TeacherStyle.scroll}
-          showsVerticalScrollIndicator={false}
-        >
-          
-          <Text style={TeacherStyle.sectionTitle}>Identificação e Experiência</Text>
+        <ScrollView contentContainerStyle={TeacherStyle.scroll} showsVerticalScrollIndicator={false}>
+
+          {/* ── Identificação ── */}
+          <Text style={TeacherStyle.sectionTitle}>Identificação</Text>
           <View style={TeacherStyle.formCard}>
             <Text style={TeacherStyle.label}>NOME COMPLETO</Text>
-            <TextInput 
-              style={TeacherStyle.input} 
-              value={form.name} 
-              onChangeText={v => setForm({...form, name: v})} 
-              placeholder="Ex: André Olímpio" 
+            <TextInput
+              style={TeacherStyle.input}
+              value={form.name}
+              onChangeText={v => setForm({ ...form, name: v })}
+              placeholder="Ex: André Olímpio"
               placeholderTextColor="#C7C7CD"
             />
-            
-            <View style={TeacherStyle.row}>
-              <View style={{ flex: 2, marginRight: 10 }}>
-                <Text style={TeacherStyle.label}>TITULAÇÃO</Text>
-                <TextInput 
-                  style={TeacherStyle.input} 
-                  value={form.degreeId} 
-                  onChangeText={v => setForm({...form, degreeId: v})} 
-                  placeholder="Ex: Mestre"
-                  placeholderTextColor="#C7C7CD"
-                />
-              </View>
 
-              <View style={{ flex: 1 }}>
-                <Text style={TeacherStyle.label}>TEMPO DE DOCENCIA (XP)</Text>
-                <TextInput 
-                  style={TeacherStyle.input} 
-                  value={form.tempoDocencia?.toString()} 
-                  onChangeText={v => setForm({...form, tempoDocencia: v})} 
-                  keyboardType="numeric"
-                  placeholder="Ex: 5"
-                  placeholderTextColor="#C7C7CD"
-                  maxLength={2}
-                />
-              </View>
-            </View>
+            <Text style={TeacherStyle.label}>MATRÍCULA</Text>
+            <TextInput
+              style={TeacherStyle.input}
+              value={form.enrollment}
+              onChangeText={v => setForm({ ...form, enrollment: v })}
+              keyboardType="numeric"
+              placeholder="Ex: 1234567"
+              placeholderTextColor="#C7C7CD"
+            />
           </View>
 
-          <Text style={TeacherStyle.sectionTitle}>Atuação</Text>
+          {/* ── Acesso ── */}
+          <Text style={TeacherStyle.sectionTitle}>Acesso</Text>
           <View style={TeacherStyle.formCard}>
-            <Text style={TeacherStyle.label}>ÁREA DE ESPECIALIDADE</Text>
-            <TextInput 
-              style={TeacherStyle.input} 
-              value={form.fieldId} 
-              onChangeText={v => setForm({...form, fieldId: v})} 
-              placeholder="Ex: Desenvolvimento Web" 
-              placeholderTextColor="#C7C7CD"
-            />
-            
             <Text style={TeacherStyle.label}>E-MAIL INSTITUCIONAL</Text>
-            <TextInput 
-              style={TeacherStyle.input} 
-              value={form.email} 
-              onChangeText={v => setForm({...form, email: v})} 
+            <TextInput
+              style={TeacherStyle.input}
+              value={form.email}
+              onChangeText={v => setForm({ ...form, email: v })}
               keyboardType="email-address"
-              autoCapitalize="none" 
+              autoCapitalize="none"
               placeholder="professor@fatec.sp.gov.br"
               placeholderTextColor="#C7C7CD"
             />
+
+            <Text style={TeacherStyle.label}>SENHA</Text>
+            <View style={{ position: 'relative' }}>
+              <TextInput
+                style={TeacherStyle.input}
+                value={form.password}
+                onChangeText={v => setForm({ ...form, password: v })}
+                secureTextEntry={!showPassword}
+                placeholder="Mínimo 6 caracteres"
+                placeholderTextColor="#C7C7CD"
+              />
+              <TouchableOpacity
+                onPress={() => setShowPassword(p => !p)}
+                style={{ position: 'absolute', right: 12, top: 12 }}
+              >
+                <Ionicons name={showPassword ? 'eye-off-outline' : 'eye-outline'} size={20} color="#8E8E93" />
+              </TouchableOpacity>
+            </View>
           </View>
 
-          <TouchableOpacity 
-            style={TeacherStyle.saveBtn} 
-            onPress={handleSave}
-            activeOpacity={0.8}
-          >
+          {/* ── Experiência ── */}
+          <Text style={TeacherStyle.sectionTitle}>Experiência</Text>
+          <View style={TeacherStyle.formCard}>
+
+            {loadingOptions ? (
+              <ActivityIndicator size="small" color="#007AFF" style={{ marginVertical: 16 }} />
+            ) : (
+              <>
+                {/* Select Titulação */}
+                <Text style={TeacherStyle.label}>TITULAÇÃO</Text>
+                <TouchableOpacity
+                  style={TeacherStyle.customSelectButton}
+                  onPress={() => setDegreeModalVisible(true)}
+                  activeOpacity={0.7}
+                >
+                  <Text style={selectedDegree ? TeacherStyle.selectButtonText : TeacherStyle.placeholderText}>
+                    {selectedDegree ? selectedDegree.name : 'Selecione a titulação...'}
+                  </Text>
+                  <Ionicons name="chevron-down" size={18} color="#636366" />
+                </TouchableOpacity>
+
+                {/* Select Área de Atuação */}
+                <Text style={TeacherStyle.label}>ÁREA DE ATUAÇÃO</Text>
+                <TouchableOpacity
+                  style={TeacherStyle.customSelectButton}
+                  onPress={() => setFieldModalVisible(true)}
+                  activeOpacity={0.7}
+                >
+                  <Text style={selectedField ? TeacherStyle.selectButtonText : TeacherStyle.placeholderText}>
+                    {selectedField ? selectedField.name : 'Selecione a área...'}
+                  </Text>
+                  <Ionicons name="chevron-down" size={18} color="#636366" />
+                </TouchableOpacity>
+              </>
+            )}
+
+            <Text style={TeacherStyle.label}>ANOS DE DOCÊNCIA</Text>
+            <TextInput
+              style={TeacherStyle.input}
+              value={String(form.teachingExperience ?? '')}
+              onChangeText={v => setForm({ ...form, teachingExperience: v === '' ? 0 : Number(v) as any })}
+              keyboardType="numeric"
+              placeholder="Ex: 5"
+              placeholderTextColor="#C7C7CD"
+              maxLength={2}
+            />
+          </View>
+
+          <TouchableOpacity style={TeacherStyle.saveBtn} onPress={handleSave} activeOpacity={0.8}>
             <Text style={TeacherStyle.saveBtnText}>
-              {editData ? "SALVAR ALTERAÇÕES" : "CADASTRAR PROFESSOR"}
+              {editData ? 'SALVAR ALTERAÇÕES' : 'CADASTRAR PROFESSOR'}
             </Text>
           </TouchableOpacity>
 
           <View style={{ height: 40 }} />
         </ScrollView>
       </KeyboardAvoidingView>
+
+      {/* ── Modal Titulação ── */}
+      <Modal animationType="slide" transparent visible={degreeModalVisible} onRequestClose={() => setDegreeModalVisible(false)}>
+        <View style={TeacherStyle.modalOverlay}>
+          <View style={TeacherStyle.modalContent}>
+            <Text style={TeacherStyle.modalTitle}>Selecione a Titulação</Text>
+            <ScrollView showsVerticalScrollIndicator={false}>
+              {degrees.map(d => (
+                <TouchableOpacity
+                  key={d.id}
+                  style={TeacherStyle.modalOption}
+                  onPress={() => { setSelectedDegree(d); setDegreeModalVisible(false); }}
+                >
+                  <Text style={TeacherStyle.modalOptionText}>{d.name}</Text>
+                </TouchableOpacity>
+              ))}
+              <TouchableOpacity
+                style={[TeacherStyle.modalOption, TeacherStyle.cancelOption]}
+                onPress={() => setDegreeModalVisible(false)}
+              >
+                <Text style={[TeacherStyle.modalOptionText, TeacherStyle.cancelOptionText]}>Cancelar</Text>
+              </TouchableOpacity>
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
+
+      <Modal animationType="slide" transparent visible={fieldModalVisible} onRequestClose={() => setFieldModalVisible(false)}>
+        <View style={TeacherStyle.modalOverlay}>
+          <View style={TeacherStyle.modalContent}>
+            <Text style={TeacherStyle.modalTitle}>Selecione a Área</Text>
+            <ScrollView showsVerticalScrollIndicator={false}>
+              {fields.map(f => (
+                <TouchableOpacity
+                  key={f.id}
+                  style={TeacherStyle.modalOption}
+                  onPress={() => { setSelectedField(f); setFieldModalVisible(false); }}
+                >
+                  <Text style={TeacherStyle.modalOptionText}>{f.name}</Text>
+                </TouchableOpacity>
+              ))}
+              <TouchableOpacity
+                style={[TeacherStyle.modalOption, TeacherStyle.cancelOption]}
+                onPress={() => setFieldModalVisible(false)}
+              >
+                <Text style={[TeacherStyle.modalOptionText, TeacherStyle.cancelOptionText]}>Cancelar</Text>
+              </TouchableOpacity>
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
+
     </SafeAreaView>
   );
 };
