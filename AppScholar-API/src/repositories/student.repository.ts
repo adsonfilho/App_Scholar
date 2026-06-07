@@ -21,6 +21,7 @@ class StudentRepository{
                         state: data.state,
                         number: data.number,
                         courseId: data.courseId,
+                        neighborhood: data.neighborhood
                     },
                 },
             },

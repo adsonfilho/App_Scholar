@@ -46,7 +46,6 @@ export const createStudentSchema = z.object({
     courseId: z
         .int()
         .min(1, 'ID do curso é obrigatório')
-        .optional(),
 });
 
 
