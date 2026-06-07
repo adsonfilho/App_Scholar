@@ -11,6 +11,9 @@ import { RegisterTeacher } from '../screens/RegisterProfessor';
 import { TeacherList } from '../screens/TeacherList';
 import { CourseList } from '../screens/CourseList';
 import { RegisterCourse } from '../screens/RegisterCourse';
+import { CourseDetails } from '../screens/CourseDetails';
+import { RegisterSubject } from '../screens/RegisterSubjects';
+
 import { StudentReport } from '../screens/StudentReport';
 import { RegisterInvitation } from '../screens/RegisterInvitation';
 
@@ -48,6 +51,9 @@ export const AppRoutes = () => {
               <Stack.Screen name="RegisterTeacher" component={RegisterTeacher} />
               <Stack.Screen name="Course" component={CourseList} />
               <Stack.Screen name="RegisterCourse" component={RegisterCourse} />
+              
+              <Stack.Screen name="CourseDetails" component={CourseDetails} />
+              <Stack.Screen name="RegisterSubject" component={RegisterSubject} />
             </>
           )}
 

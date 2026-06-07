@@ -38,6 +38,12 @@ class SubjectRepository {
     });
   }
 
+  public async findAllByCourseId(courseId: number) {
+    return prisma.subject.findMany({
+      where: { courseId },
+    });
+  }
+
   public async update(id: number, data: UpdateSubjectDTO) {
     return prisma.subject.update({
       where: { id },

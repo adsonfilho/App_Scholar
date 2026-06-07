@@ -36,6 +36,15 @@ class SubjectController {
     }
   }
 
+  public async findAllByCourseId(req: Request, res: Response, next: NextFunction) {
+    try {
+      const subjects = await subjectService.findAllByCourseId(Number(req.params.courseId));
+      return res.status(200).json(subjects);
+    } catch (error) {
+      next(error);
+    }
+  }
+
   public async update(req: Request, res: Response, next: NextFunction) {
     try {
       const subject = await subjectService.update(Number(req.params.id), req.body);

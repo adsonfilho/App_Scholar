@@ -43,5 +43,58 @@ export const CourseStyle = StyleSheet.create({
   textArea: { height: 100, textAlignVertical: 'top' },
   row: { flexDirection: 'row' },
   saveBtn: { backgroundColor: '#5856D6', padding: 18, borderRadius: 15, alignItems: 'center', marginTop: 10 },
-  saveBtnText: { color: '#FFF', fontWeight: 'bold', fontSize: 16 }
+  saveBtnText: { color: '#FFF', fontWeight: 'bold', fontSize: 16 },
+  // Adicione esses seletores logo abaixo do seu 'row' ou 'saveBtnText' dentro do StyleSheet.create:
+
+  customSelect: {
+    backgroundColor: '#F2F2F7',
+    borderRadius: 10,
+    padding: 14,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  selectText: {
+    fontSize: 16,
+    color: '#1C1C1E',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
+    backgroundColor: '#FFF',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    paddingHorizontal: 20,
+    paddingTop: 24,
+    paddingBottom: Platform.OS === 'ios' ? 40 : 24,
+  },
+  modalTitle: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: '#8E8E93',
+    textAlign: 'center',
+    marginBottom: 16,
+    textTransform: 'uppercase',
+  },
+  modalOption: {
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F2F2F7',
+    alignItems: 'center',
+  },
+  modalOptionText: {
+    fontSize: 16,
+    color: '#5856D6', 
+    fontWeight: '700',
+  },
+  modalCancel: {
+    marginTop: 12,
+    backgroundColor: '#F2F2F7',
+    borderRadius: 12,
+    borderBottomWidth: 0,
+  }
 });

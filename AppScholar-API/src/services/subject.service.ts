@@ -27,6 +27,10 @@ class SubjectService {
     return subjectRepository.findAll();
   }
 
+  public async findAllByCourseId(courseId: number) {
+    return subjectRepository.findAllByCourseId(courseId);
+  }
+
   public async update(id: number, data: UpdateSubjectDTO) {
     const validatedData = updateSubjectSchema.parse(data);
 
