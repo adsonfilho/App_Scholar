@@ -3,24 +3,48 @@ import { View, Text, ScrollView, TextInput, TouchableOpacity, KeyboardAvoidingVi
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { TeacherStyle } from '../styles/TeacherStyle';
-import { teacherSchema, ITeacher, TEACHER_INITIAL_STATE } from '../schemas/teacherSchema';
+import { professorSchema, IProfessor, TEACHER_INITIAL_STATE } from '../schemas/professorSchema';
 import { StatusMessage } from '../components/StatusMessage';
 import { UI_SETTINGS } from '../config/config';
+import { professorService } from '../services/professorService';
 
 export const RegisterTeacher = ({ navigation, route }: any) => {
   const editData = route.params?.teacher;
-  const [form, setForm] = useState<ITeacher>(editData || TEACHER_INITIAL_STATE);
+  const [form, setForm] = useState<IProfessor>(editData || TEACHER_INITIAL_STATE);
   const [message, setMessage] = useState<string | null>(null);
   const [msgType, setMsgType] = useState<'success' | 'error' | 'warning'>('error');
 
-  const handleSave = () => {
-    const result = teacherSchema.safeParse(form);
+  const handleSave = async () => {
+    const result = professorSchema.safeParse(form);
     
     if (!result.success) {
         setMsgType('error');
         setMessage(result.error.issues[0].message);
         setTimeout(() => { setMessage(null);}, UI_SETTINGS.STATUS_DURATION)
         return;
+    }
+
+    if (editData) {
+      const updatedProfessor = await professorService.updateProfessor(editData.id, result.data);
+      if (!updatedProfessor) {
+        setMsgType('error');
+        setMessage("Erro ao salvar alterações. Tente novamente.");
+        setTimeout(() => { setMessage(null);}, UI_SETTINGS.STATUS_DURATION)
+        return;
+      }
+      setMsgType('success');
+      setMessage("Alterações salvas!");
+      setTimeout(() => { setMessage(null); navigation.goBack(); }, UI_SETTINGS.LOAD_SIMULATION_TIME);
+      return;
+    }
+
+    const newProfessor = await professorService.createProfessor(result.data);
+
+    if (!newProfessor) {
+      setMsgType('error');
+      setMessage("Erro ao salvar professor. Tente novamente.");
+      setTimeout(() => { setMessage(null);}, UI_SETTINGS.STATUS_DURATION)
+      return;
     }
 
     setMsgType('success');
@@ -58,8 +82,8 @@ export const RegisterTeacher = ({ navigation, route }: any) => {
             <Text style={TeacherStyle.label}>NOME COMPLETO</Text>
             <TextInput 
               style={TeacherStyle.input} 
-              value={form.nome} 
-              onChangeText={v => setForm({...form, nome: v})} 
+              value={form.name} 
+              onChangeText={v => setForm({...form, name: v})} 
               placeholder="Ex: André Olímpio" 
               placeholderTextColor="#C7C7CD"
             />
@@ -69,8 +93,8 @@ export const RegisterTeacher = ({ navigation, route }: any) => {
                 <Text style={TeacherStyle.label}>TITULAÇÃO</Text>
                 <TextInput 
                   style={TeacherStyle.input} 
-                  value={form.titulacao} 
-                  onChangeText={v => setForm({...form, titulacao: v})} 
+                  value={form.degreeId} 
+                  onChangeText={v => setForm({...form, degreeId: v})} 
                   placeholder="Ex: Mestre"
                   placeholderTextColor="#C7C7CD"
                 />
@@ -96,8 +120,8 @@ export const RegisterTeacher = ({ navigation, route }: any) => {
             <Text style={TeacherStyle.label}>ÁREA DE ESPECIALIDADE</Text>
             <TextInput 
               style={TeacherStyle.input} 
-              value={form.areaAtuacao} 
-              onChangeText={v => setForm({...form, areaAtuacao: v})} 
+              value={form.fieldId} 
+              onChangeText={v => setForm({...form, fieldId: v})} 
               placeholder="Ex: Desenvolvimento Web" 
               placeholderTextColor="#C7C7CD"
             />

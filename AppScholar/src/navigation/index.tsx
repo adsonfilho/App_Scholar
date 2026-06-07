@@ -4,7 +4,7 @@ import { Login } from '../screens/Login';
 import { Dashboard } from '../screens/Dashboard';
 import { StudentList } from '../screens/StudentList'
 import { RegisterStudent } from '../screens/RegisterStudent';
-import { RegisterTeacher } from '../screens/RegisterTeacher';
+import { RegisterTeacher } from '../screens/RegisterProfessor';
 import { TeacherList } from '../screens/TeacherList';
 import { CourseList } from '../screens/CourseList';
 import { RegisterCourse } from '../screens/RegisterCourse';

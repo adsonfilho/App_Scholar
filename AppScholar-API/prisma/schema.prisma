@@ -58,6 +58,7 @@ model Student {
   phone      String
   address    String
   city       String
+  neighborhood String
   state      String
   courseId   Int      @map("course_id")
   createdAt  DateTime @default(now()) @map("created_at")

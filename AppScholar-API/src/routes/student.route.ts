@@ -1,12 +1,13 @@
 import { studentController } from '../controllers/student.controller';
 import { Router } from 'express';
+import { ensureAuthenticated } from '../middlewares/auth.middleware';
 
 const router = Router();
 
-router.get('/', studentController.getAllStudents);
 router.post('/', studentController.createStudent);
-router.get('/:userId', studentController.getStudent);
-router.put('/:userId', studentController.updateStudent);
-router.delete('/:userId', studentController.deleteStudent);
+router.get('/', ensureAuthenticated as any, studentController.getAllStudents);
+router.get('/:userId', ensureAuthenticated as any, studentController.getStudent);
+router.put('/:userId', ensureAuthenticated as any, studentController.updateStudent as any);
+router.delete('/:userId', ensureAuthenticated as any, studentController.deleteStudent as any);
 
 export default router;

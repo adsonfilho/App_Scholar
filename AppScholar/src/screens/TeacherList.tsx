@@ -3,7 +3,7 @@ import { View, Text, FlatList, TouchableOpacity, TextInput, Alert, Platform, Key
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { TeacherStyle } from '../styles/TeacherStyle';
-import { TEACHER_INITIAL_STATE } from '../schemas/teacherSchema';
+import { TEACHER_INITIAL_STATE } from '../schemas/professorSchema';
 
 export const TeacherList = ({ navigation }: any) => {
   const [search, setSearch] = useState('');

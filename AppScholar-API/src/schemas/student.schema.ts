@@ -30,6 +30,9 @@ export const createStudentSchema = z.object({
     address: z
         .string()
         .min(1, 'Endereço é obrigatório'),
+    neighborhood: z
+        .string()
+        .min(1, 'Bairro é obrigatório'),
     number: z
         .string()
         .min(1, 'Número é obrigatório'),
@@ -42,7 +45,8 @@ export const createStudentSchema = z.object({
         .length(2, 'UF deve conter 2 caracteres'),
     courseId: z
         .int()
-        .min(1, 'ID do curso é obrigatório'),   
+        .min(1, 'ID do curso é obrigatório')
+        .optional(),
 });
 
 

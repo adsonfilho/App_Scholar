@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { studentService } from '../services/student.service';
+import { AuthRequest } from '../schemas/auth.schema';
 
 class StudentController {
 
@@ -32,9 +33,15 @@ class StudentController {
         }
     }
     
-    public async updateStudent(req: Request, res: Response, next: NextFunction): Promise<void> {
+    public async updateStudent(req: AuthRequest, res: Response, next: NextFunction): Promise<void | Response<any>> {
         try {
-            const userId = Number(req.params.userId);
+            const loggedUserRole = req.user.role;
+
+            if (loggedUserRole !== 'STUDENT' && loggedUserRole !== 'ADMIN') {
+                return res.status(403).json({ message: "Apenas estudantes e administradores podem editar informações." });
+            }
+
+            const userId = req.user.id; 
             const updatedStudent = await studentService.updateByUserId(userId, req.body);
             res.status(200).json(updatedStudent);
         } catch (error) {
@@ -42,8 +49,14 @@ class StudentController {
         }
     }
 
-    public async deleteStudent(req: Request, res: Response, next: NextFunction): Promise<void> {
-        try {
+    public async deleteStudent(req: AuthRequest, res: Response, next: NextFunction): Promise<void | Response<any>> {
+        try {            
+            const loggedUserRole = req.user.role;
+
+            if (loggedUserRole !== 'ADMIN') {
+                return res.status(403).json({ message: "Apenas administradores podem excluir estudantes." });
+            }
+
             const userId = Number(req.params.userId);
             await studentService.deleteByUserId(userId);
             res.status(204).send();

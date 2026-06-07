@@ -1,11 +1,13 @@
 import { Router } from 'express';
 import { professorController } from '../controllers/professor.controller';
+import { ensureAuthenticated } from '../middlewares/auth.middleware';
+
 const router = Router();
 
-router.get('/', professorController.getAllProfessors);
-router.get('/:userId', professorController.getProfessor);
+router.get('/', ensureAuthenticated as any, professorController.getAllProfessors);
+router.get('/:userId', ensureAuthenticated as any, professorController.getProfessor);
 router.post('/', professorController.createProfessor);
-router.put('/:userId', professorController.updateProfessor);
-router.delete('/:userId', professorController.deleteProfessor);
+router.put('/:userId', ensureAuthenticated as any, professorController.updateProfessor as any);
+router.delete('/:userId', ensureAuthenticated as any, professorController.deleteProfessor as any);
 
 export default router;

@@ -8,6 +8,7 @@ import { studentSchema, STUDENT_INITIAL_STATE, IStudent } from '../schemas/stude
 import { RegisterStudentStyle } from '../styles/StudentStyle';
 import { UI_SETTINGS } from '../config/config';
 import { getAddressByCep } from '../services/cepService';
+import { studentService } from '../services/StudentService';
 
 const CEP_MASK = [/\d/, /\d/, /\d/, /\d/, /\d/, '-', /\d/, /\d/, /\d/];
 
@@ -20,17 +21,17 @@ export const RegisterStudent = ({ navigation, route }: any) => {
   const [msgType, setMsgType] = useState<'success' | 'error' | 'warning'>('error');
 
   const handleCepBlur = async () => {
-    const cleanedCep = form.cep.replace(/\D/g, '');
+    const cleanedCep = form.zipCode.replace(/\D/g, '');
     if (cleanedCep.length === 8) {
       const address = await getAddressByCep(cleanedCep);
       
       if (address) {
-        setForm(prev => ({
+        setForm((prev: any) => ({
           ...prev,
-          estado: address.uf,
-          cidade: address.localidade,
-          endereco: address.logradouro,
-          bairro: address.bairro,
+          state: address.uf,
+          city: address.localidade,
+          address: address.logradouro,
+          neighborhood: address.bairro,
         }));
       } else {
         setMsgType('error');
@@ -40,11 +41,11 @@ export const RegisterStudent = ({ navigation, route }: any) => {
     }
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     const dataToValidate = {
       ...form,
-      cep: form.cep.replace(/\D/g, ''),
-      telefone: form.telefone.replace(/\D/g, '')
+      cep: form.zipCode.replace(/\D/g, ''),
+      telefone: form.phone.replace(/\D/g, '')
     };
 
     const result = studentSchema.safeParse(dataToValidate);
@@ -52,6 +53,15 @@ export const RegisterStudent = ({ navigation, route }: any) => {
     if (!result.success) {
       setMsgType('error');
       setMessage(result.error.issues[0].message);
+      setTimeout(() => setMessage(null), UI_SETTINGS.STATUS_DURATION);
+      return;
+    }
+
+    const newStudent = await studentService.createStudent(dataToValidate);
+
+    if (!newStudent) {
+      setMsgType('error');
+      setMessage("Erro ao salvar aluno. Tente novamente.");
       setTimeout(() => setMessage(null), UI_SETTINGS.STATUS_DURATION);
       return;
     }
@@ -91,8 +101,8 @@ export const RegisterStudent = ({ navigation, route }: any) => {
             <Text style={RegisterStudentStyle.label}>NOME COMPLETO</Text>
             <TextInput 
               style={RegisterStudentStyle.input} 
-              value={form.nome} 
-              onChangeText={v => setForm({...form, nome: v})} 
+              value={form.name} 
+              onChangeText={v => setForm({...form, name: v})} 
               placeholder="Ex: Adson Ottoni" 
               placeholderTextColor="#C7C7CD"
             />
@@ -102,19 +112,19 @@ export const RegisterStudent = ({ navigation, route }: any) => {
                 <Text style={RegisterStudentStyle.label}>MATRÍCULA</Text>
                 <TextInput 
                   style={RegisterStudentStyle.input} 
-                  value={form.matricula} 
-                  onChangeText={v => setForm({...form, matricula: v})} 
+                  value={form.enrollment} 
+                  onChangeText={v => setForm({...form, enrollment: v})} 
                   keyboardType="numeric" 
                 />
               </View>
-              <View style={{ flex: 1 }}>
+              {/* <View style={{ flex: 1 }}>
                 <Text style={RegisterStudentStyle.label}>CURSO</Text>
                 <TextInput 
                   style={RegisterStudentStyle.input} 
-                  value={form.curso} 
-                  onChangeText={v => setForm({...form, curso: v})} 
+                  value={form.course} 
+                  onChangeText={v => setForm({...form, course: v})} 
                 />
-              </View>
+              </View> */}
             </View>
           </View>
 
@@ -132,8 +142,8 @@ export const RegisterStudent = ({ navigation, route }: any) => {
             <Text style={RegisterStudentStyle.label}>TELEFONE</Text>
             <MaskInput
               style={RegisterStudentStyle.input}
-              value={form.telefone}
-              onChangeText={(masked) => setForm({...form, telefone: masked})}
+              value={form.phone}
+              onChangeText={(masked) => setForm({...form, phone: masked})}
               mask={Masks.BRL_PHONE}
               keyboardType="numeric"
               placeholder="(00) 00000-0000"
@@ -148,8 +158,8 @@ export const RegisterStudent = ({ navigation, route }: any) => {
                 <Text style={RegisterStudentStyle.label}>CEP</Text>
                 <MaskInput
                   style={RegisterStudentStyle.input}
-                  value={form.cep}
-                  onChangeText={(masked) => setForm({...form, cep: masked})}
+                  value={form.zipCode}
+                  onChangeText={(masked) => setForm({...form, zipCode: masked})}
                   onBlur={handleCepBlur}
                   mask={CEP_MASK}
                   keyboardType="numeric"
@@ -161,8 +171,8 @@ export const RegisterStudent = ({ navigation, route }: any) => {
                 <Text style={RegisterStudentStyle.label}>UF</Text>
                 <TextInput 
                   style={RegisterStudentStyle.input} 
-                  value={form.estado} 
-                  onChangeText={v => setForm({...form, estado: v})} 
+                  value={form.state} 
+                  onChangeText={v => setForm({...form, state: v})} 
                   maxLength={2} 
                   autoCapitalize="characters" 
                 />
@@ -172,8 +182,8 @@ export const RegisterStudent = ({ navigation, route }: any) => {
             <Text style={RegisterStudentStyle.label}>CIDADE</Text>
             <TextInput 
               style={RegisterStudentStyle.input} 
-              value={form.cidade} 
-              onChangeText={v => setForm({...form, cidade: v})} 
+              value={form.city} 
+              onChangeText={v => setForm({...form, city: v})} 
             />
 
             <View style={RegisterStudentStyle.row}>
@@ -181,16 +191,16 @@ export const RegisterStudent = ({ navigation, route }: any) => {
                 <Text style={RegisterStudentStyle.label}>LOGRADOURO</Text>
                 <TextInput 
                   style={RegisterStudentStyle.input} 
-                  value={form.endereco} 
-                  onChangeText={v => setForm({...form, endereco: v})} 
+                  value={form.address} 
+                  onChangeText={v => setForm({...form, address: v})} 
                 />
               </View>
               <View style={{ flex: 1 }}>
                 <Text style={RegisterStudentStyle.label}>Nº</Text>
                 <TextInput 
                   style={RegisterStudentStyle.input} 
-                  value={form.numero} 
-                  onChangeText={v => setForm({...form, numero: v})} 
+                  value={form.number} 
+                  onChangeText={v => setForm({...form, number: v})} 
                   keyboardType="numeric"
                   placeholder="123"
                   placeholderTextColor="#C7C7CD"
@@ -201,8 +211,8 @@ export const RegisterStudent = ({ navigation, route }: any) => {
             <Text style={RegisterStudentStyle.label}>BAIRRO</Text>
             <TextInput 
               style={RegisterStudentStyle.input} 
-              value={form.bairro} 
-              onChangeText={v => setForm({...form, bairro: v})} 
+              value={form.neighborhood} 
+              onChangeText={v => setForm({...form, neighborhood: v})} 
             />
           </View>
 
