@@ -67,15 +67,17 @@ export const Dashboard = ({ navigation }: any) => {
                   iconColor="#FF9500"
                   onPress={() => navigation.navigate('Course')}
                 />
-
-                <MenuItem 
-                  title="Lançar Notas" 
-                  description="Selecione uma disciplina e gerencie as notas dos alunos." 
-                  iconName="pencil-sharp" 
-                  iconColor="#AF52DE"
-                  onPress={() => navigation.navigate('TeacherGrades')}
-                />
               </>
+            )}
+
+            {user?.role === 'PROFESSOR' && (
+              <MenuItem 
+                title="Lançar Notas" 
+                description="Selecione uma disciplina e gerencie as notas dos alunos." 
+                iconName="pencil-sharp" 
+                iconColor="#AF52DE"
+                onPress={() => navigation.navigate('TeacherGrades')}
+              />
             )}
 
             {user?.role === 'ADMIN' && (

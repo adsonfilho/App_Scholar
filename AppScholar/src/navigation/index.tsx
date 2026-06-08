@@ -55,6 +55,11 @@ export const AppRoutes = () => {
               <Stack.Screen name="CourseDetails" component={CourseDetails} />
               
               <Stack.Screen name="StudentListReport" component={StudentListReport} />
+            </>
+          )}
+
+          {user?.role === 'PROFESSOR' && (
+            <>
               <Stack.Screen name="TeacherGrades" component={TeacherGrades} />
             </>
           )}

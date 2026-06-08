@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, TouchableOpacity, TextInput, Alert, Platform, Keyboard, ActivityIndicator } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, TextInput, Platform, Keyboard, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useIsFocused } from '@react-navigation/native'; 
@@ -7,12 +7,16 @@ import { useIsFocused } from '@react-navigation/native';
 import { CourseStyle } from '../styles/CourseStyle';
 import { COURSE_INITIAL_STATE } from '../schemas/courseSchema';
 import { courseService } from '../services/courseService'; 
+import { useStatus } from '../hooks/useStatus';
+import { StatusMessage } from '../components/StatusMessage';
 
 export const CourseList = ({ navigation }: any) => {
   const isFocused = useIsFocused(); 
   const [search, setSearch] = useState('');
   const [courses, setCourses] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const { status, showStatus, hideStatus } = useStatus();
 
   const periodLabels: Record<string, string> = {
     MORNING: 'Matutino',
@@ -33,7 +37,7 @@ export const CourseList = ({ navigation }: any) => {
       const data = await courseService.getCourses();
       setCourses(data);
     } catch (error) {
-      Alert.alert("Erro", "Não foi possível carregar os cursos do banco.");
+      showStatus("Não foi possível carregar os cursos do banco.", "error");
     } finally {
       setLoading(false);
     }
@@ -45,20 +49,23 @@ export const CourseList = ({ navigation }: any) => {
   );
 
   const handleEdit = (item: any) => {
+    hideStatus();
     navigation.navigate('RegisterCourse', { 
       course: { ...COURSE_INITIAL_STATE, ...item } 
     });
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = (id: number) => {
     Keyboard.dismiss();
+    hideStatus();
     
     const performDelete = async () => {
       try {
         await courseService.deleteCourse(id);
         setCourses(prev => prev.filter(c => c.id !== id));
+        showStatus("Curso removido com sucesso.", "success");
       } catch (error) {
-        Alert.alert("Erro", "Não foi possível remover o curso.");
+        showStatus("Não foi possível remover o curso.", "error");
       }
     };
 
@@ -67,26 +74,38 @@ export const CourseList = ({ navigation }: any) => {
         performDelete();
       }
     } else {
-      Alert.alert(
-        "Excluir Curso",
-        "Tem certeza que deseja remover este curso do sistema?",
-        [
-          { text: "Cancelar", style: "cancel" },
-          { text: "Excluir", style: "destructive", onPress: performDelete }
-        ]
-      );
+      showStatus("Confirme a exclusão no alerta do sistema.", undefined);
+      import('react-native').then(({ Alert }) => {
+        Alert.alert(
+          "Excluir Curso",
+          "Tem certeza que deseja remover este curso do sistema?",
+          [
+            { text: "Cancelar", style: "cancel", onPress: hideStatus },
+            { text: "Excluir", style: "destructive", onPress: performDelete }
+          ]
+        );
+      });
     }
   };
 
   return (
     <SafeAreaView style={CourseStyle.container} edges={['top']}>
+      <StatusMessage
+        message={status?.msg || null}
+        type={status?.type}
+        onClose={hideStatus}
+      />
+
       <View style={CourseStyle.navHeader}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={CourseStyle.navBtn}>
           <Ionicons name="arrow-back" size={26} color="#007AFF" />
         </TouchableOpacity>
         <Text style={CourseStyle.navTitle}>Cursos</Text>
         <TouchableOpacity 
-          onPress={() => navigation.navigate('RegisterCourse')} 
+          onPress={() => {
+            hideStatus();
+            navigation.navigate('RegisterCourse');
+          }} 
           style={CourseStyle.headerAddBtn}
         >
           <Ionicons name="add" size={28} color="#FFF" />
@@ -127,7 +146,10 @@ export const CourseList = ({ navigation }: any) => {
           renderItem={({ item }) => (
             <TouchableOpacity 
               style={CourseStyle.card}
-              onPress={() => navigation.navigate('CourseDetails', { course: item })}
+              onPress={() => {
+                hideStatus();
+                navigation.navigate('CourseDetails', { course: item });
+              }}
               activeOpacity={0.8}
             >
               <View style={CourseStyle.avatar}>

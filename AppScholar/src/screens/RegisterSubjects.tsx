@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, Alert, Modal, ActivityIndicator } from 'react-native';
+import { View, Text, ScrollView, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, Modal, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -7,6 +7,8 @@ import { CourseStyle } from '../styles/CourseStyle';
 import { subjectService } from '../services/subjectService';
 import { professorService } from '../services/professorService'; 
 import { subjectSchema, SUBJECT_INITIAL_STATE } from '../schemas/subjectSchema';
+import { useStatus } from '../hooks/useStatus'; 
+import { StatusMessage } from '../components/StatusMessage'; 
 
 export const RegisterSubject = ({ navigation, route }: any) => {
   const { courseId } = route.params; 
@@ -15,8 +17,10 @@ export const RegisterSubject = ({ navigation, route }: any) => {
   const [loading, setLoading] = useState(false);
   const [loadingProfessors, setLoadingProfessors] = useState(true);
   
-  const [professorModalVisible, setProfessorModalVisible] = useState(false);
   const [semesterModalVisible, setSemesterModalVisible] = useState(false);
+  const [professorModalVisible, setProfessorModalVisible] = useState(false);
+
+  const { status, showStatus, hideStatus } = useStatus(); 
 
   const semestersOptions = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
@@ -26,7 +30,7 @@ export const RegisterSubject = ({ navigation, route }: any) => {
         const data = await professorService.getProfessors(); 
         setProfessors(data);
       } catch (error) {
-        Alert.alert("Erro", "Não foi possível carregar a lista de professores.");
+        showStatus("Não foi possível carregar a lista de professores.", "error");
       } finally {
         setLoadingProfessors(false);
       }
@@ -38,6 +42,7 @@ export const RegisterSubject = ({ navigation, route }: any) => {
 
   const handleSaveSubject = async () => {
     if (loading) return;
+    hideStatus(); 
 
     const result = subjectSchema.safeParse({
       ...form,
@@ -45,7 +50,8 @@ export const RegisterSubject = ({ navigation, route }: any) => {
     });
 
     if (!result.success) {
-      Alert.alert("Erro de Validação", result.error.issues[0].message);
+      const firstError = result.error.issues[0].message;
+      showStatus(firstError, 'error'); 
       return;
     }
 
@@ -53,10 +59,15 @@ export const RegisterSubject = ({ navigation, route }: any) => {
       setLoading(true);
       await subjectService.createSubject(result.data);
       
-      Alert.alert("Sucesso", "Matéria lançada com sucesso!");
-      navigation.goBack(); 
+      showStatus("Matéria lançada com sucesso!", "success"); 
+      
+      setTimeout(() => {
+        navigation.goBack(); 
+      }, 1500);
+
     } catch (error: any) {
-      Alert.alert("Erro", error.response?.data?.message || "Não foi possível cadastrar a disciplina.");
+      const apiMessage = error.response?.data?.message || "Não foi possível cadastrar a disciplina.";
+      showStatus(apiMessage, "error"); // 🌟 Erro da API no StatusMessage
     } finally {
       setLoading(false);
     }
@@ -64,6 +75,12 @@ export const RegisterSubject = ({ navigation, route }: any) => {
 
   return (
     <SafeAreaView style={CourseStyle.container} edges={['top']}>
+      <StatusMessage
+        message={status?.msg || null}
+        type={status?.type}
+        onClose={hideStatus}
+      />
+
       <View style={CourseStyle.navHeader}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={CourseStyle.navBtn} disabled={loading}>
           <Ionicons name="arrow-back" size={26} color="#007AFF" />

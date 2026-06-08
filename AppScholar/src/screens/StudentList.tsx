@@ -7,6 +7,8 @@ import { useIsFocused } from '@react-navigation/native';
 import { StudentListStyle } from '../styles/StudentStyle';
 import { STUDENT_INITIAL_STATE } from '../schemas/studentSchema';
 import { studentService } from '../services/studentService'; 
+import { useStatus } from '../hooks/useStatus';
+import { StatusMessage } from '../components/StatusMessage';
 
 export const StudentList = ({ navigation }: any) => {
   const isFocused = useIsFocused(); 
@@ -14,7 +16,8 @@ export const StudentList = ({ navigation }: any) => {
   const [students, setStudents] = useState<any[]>([]); 
   const [loading, setLoading] = useState(true);
 
-  
+  const { status, showStatus, hideStatus } = useStatus();
+
   useEffect(() => {
     if (isFocused) {
       fetchStudents();
@@ -27,7 +30,7 @@ export const StudentList = ({ navigation }: any) => {
       const data = await studentService.getStudents(); 
       setStudents(data);
     } catch (error) {
-      Alert.alert("Erro", "Não foi possível carregar a lista de alunos do banco.");
+      showStatus("Não foi possível carregar a lista de alunos do banco.", "error");
     } finally {
       setLoading(false);
     }
@@ -45,14 +48,15 @@ export const StudentList = ({ navigation }: any) => {
 
   const handleDelete = (id: string) => {
     Keyboard.dismiss();
+    hideStatus();
     
     const performDelete = async () => {
       try {
         await studentService.deleteStudent(Number(id)); 
-
+        showStatus("Aluno removido com sucesso!", "success");
         await fetchStudents();
       } catch (error) {
-        Alert.alert("Erro", "Não foi possível remover o aluno.");
+        showStatus("Não foi possível remover o aluno.", "error");
       }
     };
 
@@ -70,6 +74,12 @@ export const StudentList = ({ navigation }: any) => {
 
   return (
     <SafeAreaView style={StudentListStyle.container} edges={['top']}>
+      <StatusMessage
+        message={status?.msg || null}
+        type={status?.type}
+        onClose={hideStatus}
+      />
+
       <View style={StudentListStyle.navHeader}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={StudentListStyle.navBtn}>
           <Ionicons name="arrow-back" size={26} color="#007AFF" />

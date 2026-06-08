@@ -1,15 +1,19 @@
 import React, { useState, useCallback } from 'react';
-import { View, Text, FlatList, TouchableOpacity, TextInput, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, TextInput, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import { studentService } from '../services/studentService';
 import { TeacherStyle } from '../styles/TeacherStyle'; 
+import { useStatus } from '../hooks/useStatus';
+import { StatusMessage } from '../components/StatusMessage';
 
 export const StudentListReport = ({ navigation }: any) => {
   const [search, setSearch] = useState('');
   const [students, setStudents] = useState<any[]>([]); 
   const [loading, setLoading] = useState(true);
+
+  const { status, showStatus, hideStatus } = useStatus();
 
   const fetchStudents = async () => {
     try {
@@ -25,7 +29,7 @@ export const StudentListReport = ({ navigation }: any) => {
         console.warn("O retorno da API de estudantes não é um array válido:", response);
       }
     } catch (error) {
-      Alert.alert("Erro", "Não foi possível carregar a lista de alunos.");
+      showStatus("Não foi possível carregar a lista de alunos.", "error");
       setStudents([]); 
     } finally {
       setLoading(false);
@@ -45,6 +49,12 @@ export const StudentListReport = ({ navigation }: any) => {
 
   return (
     <SafeAreaView style={TeacherStyle.container} edges={['top']}>
+      <StatusMessage
+        message={status?.msg || null}
+        type={status?.type}
+        onClose={hideStatus}
+      />
+
       <View style={TeacherStyle.navHeader}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={TeacherStyle.navBtn}>
           <Ionicons name="arrow-back" size={26} color="#007AFF" />

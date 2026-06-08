@@ -1,12 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, TouchableOpacity, TextInput, Alert, ActivityIndicator, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, TextInput, ActivityIndicator, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
+
 import { studentService } from '../services/studentService'; 
 import { professorService } from '../services/professorService';
 import { gradeService } from '../services/gradeService';
 import { TeacherStyle } from '../styles/TeacherStyle';
 import { useAuth } from '../contexts/AuthContext';
+import { useStatus } from '../hooks/useStatus';
+import { StatusMessage } from '../components/StatusMessage';
+import { gradeInputSchema } from '../schemas/gradeSchema';
 
 export const TeacherGrades = ({ navigation }: any) => {
   const { user } = useAuth(); 
@@ -26,6 +30,8 @@ export const TeacherGrades = ({ navigation }: any) => {
 
   const [fetchedGradeData, setFetchedGradeData] = useState<any>(null);
 
+  const { status, showStatus, hideStatus } = useStatus();
+
   useEffect(() => {
     const fetchSubjects = async () => {
       try {
@@ -43,7 +49,7 @@ export const TeacherGrades = ({ navigation }: any) => {
           setSubjects([]);
         }
       } catch (error) {
-        Alert.alert("Erro", "Não foi possível carregar suas disciplinas.");
+        showStatus("Não foi possível carregar suas disciplinas.", "error");
       } finally {
         setLoading(false);
       }
@@ -55,6 +61,7 @@ export const TeacherGrades = ({ navigation }: any) => {
   }, [user]);
 
   const handleSelectSubject = async (subject: any) => {
+    hideStatus();
     setSelectedSubject(subject);
     try {
       setLoading(true);
@@ -63,13 +70,14 @@ export const TeacherGrades = ({ navigation }: any) => {
       setStudents(data);
       setCurrentStep('students');
     } catch (error) {
-      Alert.alert("Erro", "Não foi possível carregar os alunos dessa disciplina.");
+      showStatus("Não foi possível carregar os alunos dessa disciplina.", "error");
     } finally {
       setLoading(false);
     }
   };
 
   const handleSelectStudent = async (student: any) => {
+    hideStatus();
     setSelectedStudent(student);
 
     try {
@@ -132,37 +140,54 @@ export const TeacherGrades = ({ navigation }: any) => {
   };
 
   const handleSaveGrades = async () => {
+    hideStatus();
+
+    const rawGrade1 = grade1.trim() ? Number(grade1.replace(',', '.')) : NaN;
+    const rawGrade2 = grade2.trim() ? Number(grade2.replace(',', '.')) : null;
+
+    const validation = gradeInputSchema.safeParse({
+      grade1: rawGrade1,
+      grade2: rawGrade2,
+    });
+
+    if (!validation.success) {
+      showStatus(validation.error.issues[0].message, "error");
+      return;
+    }
 
     try {
       setLoading(true);
       const payload = {
         studentId: selectedStudent.id,
         subjectId: selectedSubject.id,
-        grade1: Number(grade1.replace(',', '.')),
-        grade2: grade2.trim() ? Number(grade2.replace(',', '.')) : null,
+        grade1: validation.data.grade1,
+        grade2: validation.data.grade2,
       };
 
       if (gradeId) {
         await gradeService.updateGrade(gradeId, payload);
-        Alert.alert("Sucesso", "Notas atualizadas com sucesso!");
+        showStatus("Notas atualizadas com sucesso!", "success");
       } else {
         await gradeService.createGrade(payload);
-        Alert.alert("Sucesso", "Notas lançadas com sucesso!");
+        showStatus("Notas lançadas com sucesso!", "success");
       }
 
-      setCurrentStep('subjects');
-      setSelectedSubject(null);
-      setSelectedStudent(null);
-      setFetchedGradeData(null);
+      setTimeout(() => {
+        setCurrentStep('subjects');
+        setSelectedSubject(null);
+        setSelectedStudent(null);
+        setFetchedGradeData(null);
+      }, 1500);
       
     } catch (error) {
-      Alert.alert("Erro", "Não foi possível salvar as notas.");
+      showStatus("Não foi possível salvar as notas.", "error");
     } finally {
       setLoading(false);
     }
   };
 
   const handleBack = () => {
+    hideStatus();
     if (currentStep === 'grade') {
       setCurrentStep('students');
       setSelectedStudent(null);
@@ -184,6 +209,11 @@ export const TeacherGrades = ({ navigation }: any) => {
 
   return (
     <SafeAreaView style={TeacherStyle.container} edges={['top']}>
+      <StatusMessage
+        message={status?.msg || null}
+        type={status?.type}
+        onClose={hideStatus}
+      />
       
       <View style={TeacherStyle.navHeader}>
         <TouchableOpacity 

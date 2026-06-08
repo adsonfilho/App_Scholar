@@ -1,15 +1,19 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, FlatList, TouchableOpacity, TextInput, Alert, Platform, Keyboard, ActivityIndicator } from 'react-native';
+import React, { useState, useCallback } from 'react';
+import { View, Text, FlatList, TouchableOpacity, TextInput, Platform, Keyboard, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import { TeacherStyle } from '../styles/TeacherStyle';
 import { professorService } from '../services/professorService';
+import { useStatus } from '../hooks/useStatus';
+import { StatusMessage } from '../components/StatusMessage';
 
 export const TeacherList = ({ navigation }: any) => {
   const [search, setSearch] = useState('');
   const [professors, setProfessors] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const { status, showStatus, hideStatus } = useStatus();
 
   const fetchProfessors = async () => {
     try {
@@ -17,7 +21,7 @@ export const TeacherList = ({ navigation }: any) => {
       const data = await professorService.getProfessors();
       setProfessors(data);
     } catch (error) {
-      Alert.alert("Erro", "Não foi possível carregar a lista de professores.");
+      showStatus("Não foi possível carregar a lista de professores.", "error");
     } finally {
       setLoading(false);
     }
@@ -36,25 +40,28 @@ export const TeacherList = ({ navigation }: any) => {
 
   const handleDelete = (id: number) => {
     Keyboard.dismiss();
+    hideStatus();
     
     const performDelete = async () => {
       try {
         await professorService.deleteProfessor(id); 
-        
+        showStatus("Professor removido com sucesso.", "success");
         await fetchProfessors();
-        Alert.alert("Sucesso", "Professor removido com sucesso.");
       } catch (error) {
-        Alert.alert("Erro", "Não foi possível remover o professor.");
+        showStatus("Não foi possível remover o professor.", "error");
       }
     };
 
     if (Platform.OS === 'web') {
       if (window.confirm("Deseja remover este professor?")) performDelete();
     } else {
-      Alert.alert("Excluir", "Remover professor selecionado?", [
-        { text: "Cancelar", style: "cancel" },
-        { text: "Excluir", style: "destructive", onPress: performDelete }
-      ]);
+      showStatus("Confirme a exclusão no alerta do sistema.", undefined);
+      import('react-native').then(({ Alert }) => {
+        Alert.alert("Excluir", "Remover professor selecionado?", [
+          { text: "Cancelar", style: "cancel", onPress: hideStatus },
+          { text: "Excluir", style: "destructive", onPress: performDelete }
+        ]);
+      });
     }
   };
 
@@ -67,6 +74,12 @@ export const TeacherList = ({ navigation }: any) => {
 
   return (
     <SafeAreaView style={TeacherStyle.container} edges={['top']}>
+      <StatusMessage
+        message={status?.msg || null}
+        type={status?.type}
+        onClose={hideStatus}
+      />
+
       <View style={TeacherStyle.navHeader}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={TeacherStyle.navBtn}>
           <Ionicons name="arrow-back" size={26} color="#007AFF" />

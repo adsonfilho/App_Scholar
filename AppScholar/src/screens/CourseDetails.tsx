@@ -1,17 +1,21 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useIsFocused } from '@react-navigation/native';
 
 import { CourseStyle } from '../styles/CourseStyle';
 import { subjectService } from '../services/subjectService'; 
+import { useStatus } from '../hooks/useStatus';
+import { StatusMessage } from '../components/StatusMessage';
 
 export const CourseDetails = ({ navigation, route }: any) => {
   const { course } = route.params; 
   const isFocused = useIsFocused();
   const [subjects, setSubjects] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const { status, showStatus, hideStatus } = useStatus();
 
   const periodLabels: Record<string, string> = {
     MORNING: 'Matutino',
@@ -32,7 +36,7 @@ export const CourseDetails = ({ navigation, route }: any) => {
       const data = await subjectService.getSubjectsByCourse(course.id);
       setSubjects(data);
     } catch (error) {
-      Alert.alert("Erro", "Não foi possível carregar as matérias deste curso.");
+      showStatus("Não foi possível carregar as matérias deste curso.", "error");
     } finally {
       setLoading(false);
     }
@@ -40,13 +44,28 @@ export const CourseDetails = ({ navigation, route }: any) => {
 
   return (
     <SafeAreaView style={CourseStyle.container} edges={['top']}>
+      <StatusMessage
+        message={status?.msg || null}
+        type={status?.type}
+        onClose={hideStatus}
+      />
+
       <View style={CourseStyle.navHeader}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={CourseStyle.navBtn}>
+        <TouchableOpacity 
+          onPress={() => {
+            hideStatus();
+            navigation.goBack();
+          }} 
+          style={CourseStyle.navBtn}
+        >
           <Ionicons name="arrow-back" size={26} color="#007AFF" />
         </TouchableOpacity>
         <Text style={CourseStyle.navTitle} numberOfLines={1}>{course.acronym}</Text>
         <TouchableOpacity 
-          onPress={() => navigation.navigate('RegisterSubject', { courseId: course.id })} 
+          onPress={() => {
+            hideStatus();
+            navigation.navigate('RegisterSubject', { courseId: course.id });
+          }} 
           style={CourseStyle.headerAddBtn}
         >
           <Ionicons name="add" size={28} color="#FFF" />

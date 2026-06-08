@@ -1,16 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Table, Row, Rows } from 'react-native-table-component';
 import { ReportStyle } from '../styles/ReportStyle';
 import { Ionicons } from '@expo/vector-icons';
 import { studentService } from '../services/studentService';
 import { useAuth } from '../contexts/AuthContext'; 
+import { useStatus } from '../hooks/useStatus';
+import { StatusMessage } from '../components/StatusMessage';
 
 export const StudentReport = ({ navigation, route }: any) => {
   const { user } = useAuth(); 
   const [loading, setLoading] = useState(true);
   const [studentData, setStudentData] = useState<any>(null);
+
+  const { status, showStatus, hideStatus } = useStatus();
 
   const studentId = route.params?.userId || user?.id; 
 
@@ -23,7 +27,7 @@ export const StudentReport = ({ navigation, route }: any) => {
         const data = response?.data ? response.data : response;
         setStudentData(data);
       } catch (error) {
-        Alert.alert("Erro", "Não foi possível carregar o boletim escolar.");
+        showStatus("Não foi possível carregar o boletim escolar.", "error");
       } finally {
         setLoading(false);
       }
@@ -32,8 +36,10 @@ export const StudentReport = ({ navigation, route }: any) => {
     if (studentId) {
       fetchReport();
     } else {
-      Alert.alert("Erro", "ID do aluno não foi fornecido.");
-      navigation.goBack();
+      showStatus("ID do aluno não foi fornecido.", "error");
+      setTimeout(() => {
+        navigation.goBack();
+      }, 1500);
     }
   }, [studentId]);
 
@@ -82,6 +88,12 @@ export const StudentReport = ({ navigation, route }: any) => {
 
   return (
     <SafeAreaView style={ReportStyle.container} edges={['top']}>
+      <StatusMessage
+        message={status?.msg || null}
+        type={status?.type}
+        onClose={hideStatus}
+      />
+
       <View style={ReportStyle.navHeader}>
         <TouchableOpacity 
           onPress={() => navigation.goBack()} 
