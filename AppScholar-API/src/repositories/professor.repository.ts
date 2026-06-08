@@ -41,6 +41,8 @@ class ProfessorRepository {
         return prisma.professor.findMany({
             include: {
                 user: true,
+                degree: true,
+                field: true,
             },
         });
     };

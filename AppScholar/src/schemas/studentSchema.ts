@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 export const studentSchema = z.object({
     id: z
-        .string()
+        .number() 
         .optional(),
     name: z
         .string()
@@ -12,9 +12,10 @@ export const studentSchema = z.object({
         .nonempty('Email é obrigatório'),
     password: z
         .string()
-        .min(6, 'A senha deve conter no mínimo 6 caracteres'),
+        .optional()
+        .or(z.literal('')), 
     role: z
-        .enum(['STUDENT'], 'Cargo deve ser "STUDENT"'),
+        .enum(['STUDENT'], 'Função deve ser STUDENT'),
     enrollment: z
         .string()
         .min(1, 'Matricula é obrigatória'),
@@ -42,11 +43,20 @@ export const studentSchema = z.object({
         .string()
         .min(1, 'Estado é obrigatório')
         .length(2, 'UF deve conter 2 caracteres')
+}).superRefine((data, ctx) => {
+  if (!data.id && (!data.password || data.password.trim().length < 6)) {
+    ctx.addIssue({
+      code: "custom",
+      message: 'A senha é obrigatória e deve conter no mínimo 6 caracteres cadastros',
+      path: ['password'], 
+    });
+  }
 });
 
 export type IStudent = z.infer<typeof studentSchema>;
 
-export const STUDENT_INITIAL_STATE: IStudent = {
+export const STUDENT_INITIAL_STATE = {
+  id: undefined,
   name: '',
   enrollment: '',
   email: '',
@@ -58,5 +68,5 @@ export const STUDENT_INITIAL_STATE: IStudent = {
   city: '',
   state: '',
   password: '',
-  role: 'STUDENT'
+  role: 'STUDENT' as const
 };

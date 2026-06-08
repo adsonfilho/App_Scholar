@@ -40,8 +40,8 @@ class StudentController {
             if (loggedUserRole !== 'STUDENT' && loggedUserRole !== 'ADMIN') {
                 return res.status(403).json({ message: "Apenas estudantes e administradores podem editar informações." });
             }
-
-            const userId = req.user.id; 
+            
+            const userId = loggedUserRole === 'STUDENT' ? req.user.id : Number(req.params.userId);
             const updatedStudent = await studentService.updateByUserId(userId, req.body);
             res.status(200).json(updatedStudent);
         } catch (error) {
@@ -58,6 +58,7 @@ class StudentController {
             }
 
             const userId = Number(req.params.userId);
+
             await studentService.deleteByUserId(userId);
             res.status(204).send();
         } catch (error) {

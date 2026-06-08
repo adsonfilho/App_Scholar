@@ -86,7 +86,7 @@ export const CourseDetails = ({ navigation, route }: any) => {
               <View style={CourseStyle.info}>
                 <Text style={CourseStyle.name}>{item.name}</Text>
                 <Text style={CourseStyle.details}>Carga Horária: {item.workload}h</Text>
-                <Text style={CourseStyle.details}>Professor ID/Nome: {item.professorId || 'Sem professor'}</Text>
+                <Text style={CourseStyle.details}>Professor Nome: {item.professor?.user?.name || 'Sem professor'}</Text>
               </View>
             </View>
           )}

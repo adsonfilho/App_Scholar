@@ -2,7 +2,7 @@ import api from './apiService';
 
 class SubjectService {
   async getSubjectsByCourse(courseId: number) {
-    const response = await api.get(`/courses/${courseId}/subjects`);
+    const response = await api.get(`/subjects/courses/${courseId}`);
     return response.data;
   }
 

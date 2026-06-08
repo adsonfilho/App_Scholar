@@ -50,15 +50,17 @@ export const AppRoutes = () => {
               <Stack.Screen name="Teacher" component={TeacherList} />
               <Stack.Screen name="RegisterTeacher" component={RegisterTeacher} />
               <Stack.Screen name="Course" component={CourseList} />
-              <Stack.Screen name="RegisterCourse" component={RegisterCourse} />
-              
               <Stack.Screen name="CourseDetails" component={CourseDetails} />
-              <Stack.Screen name="RegisterSubject" component={RegisterSubject} />
+              
             </>
           )}
 
           {user?.role === 'ADMIN' && (
-            <Stack.Screen name="RegisterInvitation" component={RegisterInvitation} />
+            <>
+              <Stack.Screen name="RegisterInvitation" component={RegisterInvitation} />
+              <Stack.Screen name="RegisterCourse" component={RegisterCourse} />
+              <Stack.Screen name="RegisterSubject" component={RegisterSubject} />
+            </>
           )}
         </>
       )}

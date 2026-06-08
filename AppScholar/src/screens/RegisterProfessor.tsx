@@ -18,7 +18,19 @@ interface IOption {
 export const RegisterTeacher = ({ navigation, route }: any) => {
   const editData = route.params?.teacher;
 
-  const [form, setForm] = useState<IProfessor>(editData || TEACHER_INITIAL_STATE);
+  const [form, setForm] = useState<IProfessor>(() => {
+    if (editData) {
+      return {
+        ...TEACHER_INITIAL_STATE,
+        ...editData,
+        name: editData.user?.name || '',
+        email: editData.user?.email || '',
+        password: '', 
+      };
+    }
+    return TEACHER_INITIAL_STATE;
+  });
+
   const [showPassword, setShowPassword] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [msgType, setMsgType] = useState<'success' | 'error' | 'warning'>('error');
@@ -48,7 +60,6 @@ export const RegisterTeacher = ({ navigation, route }: any) => {
         setDegrees(degreesRes.data.filter((d: IOption) => d.active));
         setFields(fieldsRes.data.filter((f: IOption) => f.active));
 
-        // Preenche os selects ao editar
         if (editData) {
           const deg = degreesRes.data.find((d: IOption) => d.id === editData.degreeId);
           const fld = fieldsRes.data.find((f: IOption) => f.id === editData.fieldId);
@@ -71,8 +82,12 @@ export const RegisterTeacher = ({ navigation, route }: any) => {
       role: 'PROFESSOR' as const,
       degreeId: Number(selectedDegree?.id ?? 0),
       fieldId: Number(selectedField?.id ?? 0),
-      teachingExperience: Number(form.teachingExperience),
+      teachingExperience: Number(form.teachingExperience)
     };
+
+    if (editData && !dataToValidate.password) {
+      delete (dataToValidate as any).password;
+    }
 
     const result = professorSchema.safeParse(dataToValidate);
 
@@ -83,7 +98,7 @@ export const RegisterTeacher = ({ navigation, route }: any) => {
 
     try {
       if (editData) {
-        await professorService.updateProfessor(editData.id, result.data);
+        await professorService.updateProfessor(editData.userId, result.data);
         showMsg('Alterações salvas!', 'success');
       } else {
         await professorService.createProfessor(result.data);
@@ -113,7 +128,6 @@ export const RegisterTeacher = ({ navigation, route }: any) => {
       >
         <ScrollView contentContainerStyle={TeacherStyle.scroll} showsVerticalScrollIndicator={false}>
 
-          {/* ── Identificação ── */}
           <Text style={TeacherStyle.sectionTitle}>Identificação</Text>
           <View style={TeacherStyle.formCard}>
             <Text style={TeacherStyle.label}>NOME COMPLETO</Text>
@@ -125,29 +139,33 @@ export const RegisterTeacher = ({ navigation, route }: any) => {
               placeholderTextColor="#C7C7CD"
             />
 
-            <Text style={TeacherStyle.label}>MATRÍCULA</Text>
-            <TextInput
-              style={TeacherStyle.input}
-              value={form.enrollment}
-              onChangeText={v => setForm({ ...form, enrollment: v })}
-              keyboardType="numeric"
-              placeholder="Ex: 1234567"
-              placeholderTextColor="#C7C7CD"
-            />
+            {!editData && (
+              <>
+                <Text style={TeacherStyle.label}>MATRÍCULA / INVITATION CODE</Text>
+                <TextInput
+                  style={TeacherStyle.input}
+                  value={form.enrollment}
+                  onChangeText={v => setForm({ ...form, enrollment: v })}
+                  keyboardType="numeric"
+                  placeholder="Ex: 1234567"
+                  placeholderTextColor="#C7C7CD"
+                />
+              </>
+            )}
           </View>
 
-          {/* ── Acesso ── */}
           <Text style={TeacherStyle.sectionTitle}>Acesso</Text>
           <View style={TeacherStyle.formCard}>
             <Text style={TeacherStyle.label}>E-MAIL INSTITUCIONAL</Text>
             <TextInput
-              style={TeacherStyle.input}
+              style={[TeacherStyle.input, editData && { backgroundColor: '#F2F2F7', color: '#8E8E93' }]}
               value={form.email}
               onChangeText={v => setForm({ ...form, email: v })}
               keyboardType="email-address"
               autoCapitalize="none"
               placeholder="professor@fatec.sp.gov.br"
               placeholderTextColor="#C7C7CD"
+              editable={!editData}
             />
 
             <Text style={TeacherStyle.label}>SENHA</Text>
@@ -157,7 +175,7 @@ export const RegisterTeacher = ({ navigation, route }: any) => {
                 value={form.password}
                 onChangeText={v => setForm({ ...form, password: v })}
                 secureTextEntry={!showPassword}
-                placeholder="Mínimo 6 caracteres"
+                placeholder={editData ? "Preencha apenas se quiser alterar" : "Mínimo 6 caracteres"}
                 placeholderTextColor="#C7C7CD"
               />
               <TouchableOpacity
@@ -169,7 +187,6 @@ export const RegisterTeacher = ({ navigation, route }: any) => {
             </View>
           </View>
 
-          {/* ── Experiência ── */}
           <Text style={TeacherStyle.sectionTitle}>Experiência</Text>
           <View style={TeacherStyle.formCard}>
 
@@ -177,7 +194,6 @@ export const RegisterTeacher = ({ navigation, route }: any) => {
               <ActivityIndicator size="small" color="#007AFF" style={{ marginVertical: 16 }} />
             ) : (
               <>
-                {/* Select Titulação */}
                 <Text style={TeacherStyle.label}>TITULAÇÃO</Text>
                 <TouchableOpacity
                   style={TeacherStyle.customSelectButton}
@@ -190,7 +206,6 @@ export const RegisterTeacher = ({ navigation, route }: any) => {
                   <Ionicons name="chevron-down" size={18} color="#636366" />
                 </TouchableOpacity>
 
-                {/* Select Área de Atuação */}
                 <Text style={TeacherStyle.label}>ÁREA DE ATUAÇÃO</Text>
                 <TouchableOpacity
                   style={TeacherStyle.customSelectButton}
@@ -227,7 +242,6 @@ export const RegisterTeacher = ({ navigation, route }: any) => {
         </ScrollView>
       </KeyboardAvoidingView>
 
-      {/* ── Modal Titulação ── */}
       <Modal animationType="slide" transparent visible={degreeModalVisible} onRequestClose={() => setDegreeModalVisible(false)}>
         <View style={TeacherStyle.modalOverlay}>
           <View style={TeacherStyle.modalContent}>

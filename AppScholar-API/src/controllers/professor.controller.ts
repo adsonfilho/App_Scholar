@@ -41,7 +41,8 @@ class ProfessorController {
                 return res.status(403).json({ message: "Apenas professores e administradores podem editar informações." });
             }
             
-            const userId = Number(req.params.userId);
+            const userId = loggedUserRole === 'PROFESSOR' ? req.user.id : Number(req.params.userId);
+
             const updatedProfessor = await professorService.updateByUserId(userId, req.body);
             res.status(200).json(updatedProfessor);
         } catch (error) {

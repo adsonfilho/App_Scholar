@@ -64,7 +64,6 @@ export const RegisterStudent = ({ navigation, route }: any) => {
       .then(r => r.json())
       .then((data: ICity[]) => {
         setCities(data);
-        // Se editando, pré-seleciona a cidade
         if (editData?.city) {
           const city = data.find(c => c.nome === editData.city);
           if (city) setSelectedCity(city);
@@ -136,7 +135,7 @@ export const RegisterStudent = ({ navigation, route }: any) => {
   };
 
   const handleSave = async () => {
-    const dataToValidate: IStudent = {
+    const dataToValidate: any = {
       ...form,
       phone: form.phone.replace(/\D/g, ''),
       zipCode: form.zipCode,
@@ -152,7 +151,21 @@ export const RegisterStudent = ({ navigation, route }: any) => {
 
     try {
       if (editData) {
-        await studentService.updateStudent(editData.id, result.data);
+        const updatePayload: any = {
+          name: result.data.name,
+          phone: result.data.phone,
+          zipCode: result.data.zipCode,
+          address: result.data.address,
+          number: result.data.number,
+          city: result.data.city,
+          state: result.data.state,
+        };
+
+        if (result.data.password && result.data.password.trim() !== '') {
+          updatePayload.password = result.data.password;
+        }
+
+        await studentService.updateStudent(editData.user.id, updatePayload);
         showMsg('Alterações salvas!', 'success');
       } else {
         await studentService.createStudent(result.data);
@@ -197,12 +210,13 @@ export const RegisterStudent = ({ navigation, route }: any) => {
 
             <Text style={RegisterStudentStyle.label}>MATRÍCULA</Text>
             <TextInput
-              style={RegisterStudentStyle.input}
+              style={[RegisterStudentStyle.input, editData && { backgroundColor: '#F2F2F7', color: '#8E8E93' }]}
               value={form.enrollment}
               onChangeText={v => setForm({ ...form, enrollment: v })}
               keyboardType="numeric"
               placeholder="Ex: 1234567"
               placeholderTextColor="#C7C7CD"
+              editable={!editData} 
             />
           </View>
 
@@ -210,13 +224,14 @@ export const RegisterStudent = ({ navigation, route }: any) => {
           <View style={RegisterStudentStyle.card}>
             <Text style={RegisterStudentStyle.label}>E-MAIL ACADÊMICO</Text>
             <TextInput
-              style={RegisterStudentStyle.input}
+              style={[RegisterStudentStyle.input, editData && { backgroundColor: '#F2F2F7', color: '#8E8E93' }]}
               value={form.email}
               onChangeText={v => setForm({ ...form, email: v })}
               autoCapitalize="none"
               keyboardType="email-address"
               placeholder="aluno@email.com"
               placeholderTextColor="#C7C7CD"
+              editable={!editData} // 🌟 BLOQUEADO NA EDIÇÃO
             />
 
             <Text style={RegisterStudentStyle.label}>SENHA</Text>
@@ -226,7 +241,7 @@ export const RegisterStudent = ({ navigation, route }: any) => {
                 value={form.password}
                 onChangeText={v => setForm({ ...form, password: v })}
                 secureTextEntry={!showPassword}
-                placeholder="Mínimo 6 caracteres"
+                placeholder={editData ? "Deixe em branco para manter a atual" : "Mínimo 6 caracteres"}
                 placeholderTextColor="#C7C7CD"
               />
               <TouchableOpacity

@@ -57,6 +57,7 @@ class StudentRepository{
         return prisma.student.findMany({
             include: {
                 user: true,
+                course: true,
             },
         });
     }

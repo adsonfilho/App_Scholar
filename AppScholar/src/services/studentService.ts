@@ -36,6 +36,7 @@ class StudentService {
 
     async updateStudent(id: number, studentData: any) {
         try {
+            console.log('Atualizando estudante com ID:', id, 'Dados:', studentData);
             const response = await api.put(`/students/${id}`, studentData);
             return response.data;
         }

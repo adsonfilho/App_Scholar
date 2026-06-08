@@ -3,6 +3,7 @@ import api from './apiService';
 class ProfessorService {
     async getProfessors() {
         try {
+            console.log('Fetching professors from API...');
             const response = await api.get('/professors');
             return response.data;
         }
@@ -34,7 +35,7 @@ class ProfessorService {
         }
     }
 
-    async deleteProfessor(id: string) {
+    async deleteProfessor(id: number) {
         try {
             const response = await api.delete(`/professors/${id}`);
             return response.data;

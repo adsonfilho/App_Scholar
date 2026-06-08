@@ -44,10 +44,10 @@ class StudentService{
         
         const student = updateStudentSchema.parse(data); 
 
-        if (student.password) {
+        if (student.password != undefined && student.password.trim() !== '') {
             student.password = await hashPassword(student.password);
         }
-
+        
         return studentRepository.updateByUserId(userId, student);
     }
 

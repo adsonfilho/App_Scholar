@@ -41,6 +41,9 @@ class SubjectRepository {
   public async findAllByCourseId(courseId: number) {
     return prisma.subject.findMany({
       where: { courseId },
+      include: {
+        professor: { include: { user: true } },
+      }
     });
   }
 
