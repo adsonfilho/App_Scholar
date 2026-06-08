@@ -15,6 +15,8 @@ interface IOption {
   active: boolean;
 }
 
+
+
 export const RegisterTeacher = ({ navigation, route }: any) => {
   const editData = route.params?.teacher;
 
@@ -220,7 +222,7 @@ export const RegisterTeacher = ({ navigation, route }: any) => {
               </>
             )}
 
-            <Text style={TeacherStyle.label}>ANOS DE DOCÊNCIA</Text>
+            <Text style={TeacherStyle.label}>Tempo de Experiência Docente (meses)</Text>
             <TextInput
               style={TeacherStyle.input}
               value={String(form.teachingExperience ?? '')}

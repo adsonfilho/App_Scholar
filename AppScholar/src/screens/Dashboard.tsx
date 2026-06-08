@@ -1,15 +1,63 @@
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView, Platform, TouchableOpacity } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, ScrollView, Platform, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { MenuItem } from '../components/MenuItem';
 import { useAuth } from '../contexts/AuthContext'; 
+import {studentService} from '../services/studentService';
+import {professorService} from '../services/professorService';
 
 export const Dashboard = ({ navigation }: any) => {
   const { user, logout } = useAuth();
+  const [loadingProfile, setLoadingProfile] = useState(false); 
 
   const handleLogout = () => {
     logout();
+  };
+
+  const handleMyDataPress = async () => {
+    if (!user?.id) return;
+
+    setLoadingProfile(true);
+    try {
+      if (user.role === 'STUDENT') {
+
+        const id = 5
+        const response = await studentService.getStudentById(id);
+
+        navigation.navigate('RegisterStudent', {
+          student: {
+            id: response.id,
+            name: response.user?.name || response.name || '',
+            email: response.user?.email || response.email || '',
+            nome: response.user?.name || response.nome || '',
+            password: '',
+            enrollment: response.student.enrollment || '',
+            phone: response.student.phone || '',
+            zipCode: response.student.zipCode || '',
+            address: response.student.address || '',
+            city: response.student.city || '',
+            state: response.student.state || '',
+            neighborhood: response.student.neighborhood || '',
+            number: response.student.number || '',
+          }
+        });
+
+      } else if (user.role === 'PROFESSOR') {
+        const response = await professorService.getProfessors();  
+        const professor = response.find((p: any) => p.userId === user.id);
+        const teacherData = professor;
+
+        navigation.navigate('RegisterTeacher', { 
+          teacher: teacherData 
+        });
+      }
+    } catch (error: any) {
+      console.error(error);
+      Alert.alert('Erro', 'Não foi possível carregar os seus dados cadastrais.');
+    } finally {
+      setLoadingProfile(false);
+    }
   };
 
   return (
@@ -42,7 +90,26 @@ export const Dashboard = ({ navigation }: any) => {
 
             <Text style={styles.sectionTitle}>Módulos de Gestão</Text>
 
-            {user?.role !== 'STUDENT' && (
+            {(user?.role === 'STUDENT' || user?.role === 'PROFESSOR') && (
+              <View style={{ position: 'relative' }}>
+                <MenuItem 
+                  title="Meus Dados" 
+                  description="Visualize e atualize suas informações de cadastro e dados pessoais." 
+                  iconName="person-circle-outline" 
+                  iconColor="#007AFF"
+                  onPress={handleMyDataPress}
+                />
+                {loadingProfile && (
+                  <ActivityIndicator 
+                    size="small" 
+                    color="#007AFF" 
+                    style={{ position: 'absolute', right: 20, top: '40%' }} 
+                  />
+                )}
+              </View>
+            )}
+
+            {user?.role === 'ADMIN' && (
               <>
                 <MenuItem 
                   title="Alunos" 
@@ -59,15 +126,17 @@ export const Dashboard = ({ navigation }: any) => {
                   iconColor="#5856D6"
                   onPress={() => navigation.navigate('Teacher')}
                 />
-
-                <MenuItem 
-                  title="Disciplinas" 
-                  description="Organize as matérias do semestre, horários e quem será o professor responsável." 
-                  iconName="book-outline" 
-                  iconColor="#FF9500"
-                  onPress={() => navigation.navigate('Course')}
-                />
               </>
+            )}
+
+            {user?.role !== 'STUDENT' && (
+              <MenuItem 
+                title="Disciplinas" 
+                description="Organize as matérias do semestre, horários e quem será o professor responsável." 
+                iconName="book-outline" 
+                iconColor="#FF9500"
+                onPress={() => navigation.navigate('Course')}
+              />
             )}
 
             {user?.role === 'PROFESSOR' && (

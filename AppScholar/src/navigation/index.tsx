@@ -44,13 +44,13 @@ export const AppRoutes = () => {
         <>
           <Stack.Screen name="Dashboard" component={Dashboard} />
           <Stack.Screen name="StudentReport" component={StudentReport} /> 
+          <Stack.Screen name="RegisterStudent" component={RegisterStudent} />
+          <Stack.Screen name="RegisterTeacher" component={RegisterTeacher} />
 
           {user?.role !== 'STUDENT' && (
             <>
               <Stack.Screen name="Student" component={StudentList} />
-              <Stack.Screen name="RegisterStudent" component={RegisterStudent} />
               <Stack.Screen name="Teacher" component={TeacherList} />
-              <Stack.Screen name="RegisterTeacher" component={RegisterTeacher} />
               <Stack.Screen name="Course" component={CourseList} />
               <Stack.Screen name="CourseDetails" component={CourseDetails} />
               
