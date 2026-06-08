@@ -35,7 +35,7 @@ export const Login = () => {
       await login(email, password);
       showStatus("Bem-vindo ao App Scholar!", "success");
     } catch (error: any) {
-      showStatus(error.message || "E-mail ou senha incorretos.", "error");
+      showStatus("E-mail ou senha incorretos.", "error");
     } finally {
       setLoadingLogin(false); 
     }

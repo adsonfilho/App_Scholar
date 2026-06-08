@@ -85,6 +85,10 @@ export const updateStudentSchema = z.object({
         .min(1, 'Estado é obrigatório')
         .length(2, 'UF deve conter 2 caracteres')
         .optional(),
+    neighborhood: z
+        .string()
+        .min(1, 'Bairro é obrigatório')
+        .optional(),
 });
 
 export type CreateStudentDTO = z.infer<typeof createStudentSchema>

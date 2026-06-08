@@ -159,6 +159,7 @@ export const RegisterStudent = ({ navigation, route }: any) => {
           number: result.data.number,
           city: result.data.city,
           state: result.data.state,
+          neighborhood: result.data.neighborhood,
         };
 
         if (result.data.password && result.data.password.trim() !== '') {

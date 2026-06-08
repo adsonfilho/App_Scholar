@@ -8,10 +8,12 @@ import { CourseStyle } from '../styles/CourseStyle';
 import { subjectService } from '../services/subjectService'; 
 import { useStatus } from '../hooks/useStatus';
 import { StatusMessage } from '../components/StatusMessage';
+import { useAuth } from '../contexts/AuthContext';
 
 export const CourseDetails = ({ navigation, route }: any) => {
   const { course } = route.params; 
   const isFocused = useIsFocused();
+  const { user } = useAuth();
   const [subjects, setSubjects] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -34,7 +36,15 @@ export const CourseDetails = ({ navigation, route }: any) => {
     try {
       setLoading(true);
       const data = await subjectService.getSubjectsByCourse(course.id);
-      setSubjects(data);
+      
+      if (user?.role === 'PROFESSOR') {
+        const teacherSubjects = data.filter((subject: any) => 
+          subject.professorId === user.id || subject.professor?.userId === user.id
+        );
+        setSubjects(teacherSubjects);
+      } else {
+        setSubjects(data);
+      }
     } catch (error) {
       showStatus("Não foi possível carregar as matérias deste curso.", "error");
     } finally {
@@ -61,15 +71,18 @@ export const CourseDetails = ({ navigation, route }: any) => {
           <Ionicons name="arrow-back" size={26} color="#007AFF" />
         </TouchableOpacity>
         <Text style={CourseStyle.navTitle} numberOfLines={1}>{course.acronym}</Text>
-        <TouchableOpacity 
-          onPress={() => {
-            hideStatus();
-            navigation.navigate('RegisterSubject', { courseId: course.id });
-          }} 
-          style={CourseStyle.headerAddBtn}
-        >
-          <Ionicons name="add" size={28} color="#FFF" />
-        </TouchableOpacity>
+        
+        {user?.role === 'ADMIN' && (
+          <TouchableOpacity 
+            onPress={() => {
+              hideStatus();
+              navigation.navigate('RegisterSubject', { courseId: course.id });
+            }} 
+            style={CourseStyle.headerAddBtn}
+          >
+            <Ionicons name="add" size={28} color="#FFF" />
+          </TouchableOpacity>
+        )}
       </View>
 
       <View style={CourseStyle.headerContent}>

@@ -2,6 +2,14 @@
 
 Aplicação de gestão escolar desenvolvida com **React Native**, **Node.js**, **Express**, **Prisma** e **PostgreSQL**.
 
+
+## 🎥 Apresentação do Projeto
+
+Apresentação das funcionalidades básicas
+
+📺 https://youtu.be/SvOF1I6b_bk
+
+
 ## 🛠 Tecnologias
 
 ### Backend

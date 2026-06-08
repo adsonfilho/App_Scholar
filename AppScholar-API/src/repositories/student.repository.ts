@@ -104,6 +104,7 @@ class StudentRepository {
             city: data.city,
             state: data.state,
             number: data.number,
+            neighborhood: data.neighborhood,
           },
         },
       },

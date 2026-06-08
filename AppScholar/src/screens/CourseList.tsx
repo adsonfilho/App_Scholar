@@ -9,9 +9,12 @@ import { COURSE_INITIAL_STATE } from '../schemas/courseSchema';
 import { courseService } from '../services/courseService'; 
 import { useStatus } from '../hooks/useStatus';
 import { StatusMessage } from '../components/StatusMessage';
+import { useAuth } from '../contexts/AuthContext'; 
+import { professorService } from '../services/professorService';
 
 export const CourseList = ({ navigation }: any) => {
   const isFocused = useIsFocused(); 
+  const { user } = useAuth(); 
   const [search, setSearch] = useState('');
   const [courses, setCourses] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -21,7 +24,7 @@ export const CourseList = ({ navigation }: any) => {
   const periodLabels: Record<string, string> = {
     MORNING: 'Matutino',
     AFTERNOON: 'Vespertino',
-    EVENING: 'Noturno',
+    EVENNING: 'Noturno',
     FULL_TIME: 'Integral'
   };
 
@@ -35,7 +38,19 @@ export const CourseList = ({ navigation }: any) => {
     try {
       setLoading(true);
       const data = await courseService.getCourses();
-      setCourses(data);
+
+      if (user?.role === 'PROFESSOR') {
+        const professorData = await professorService.getSubjectsByProfessor(user.id); 
+        const teacherSubjects = professorData.subjects || [];
+
+        const teacherCourses = data.filter((course: any) => 
+          teacherSubjects.some((subject: any) => subject.courseId === course.id)
+        );
+        setCourses(teacherCourses);
+      } else {
+        setCourses(data);
+      }
+
     } catch (error) {
       showStatus("Não foi possível carregar os cursos do banco.", "error");
     } finally {
@@ -101,15 +116,18 @@ export const CourseList = ({ navigation }: any) => {
           <Ionicons name="arrow-back" size={26} color="#007AFF" />
         </TouchableOpacity>
         <Text style={CourseStyle.navTitle}>Cursos</Text>
-        <TouchableOpacity 
-          onPress={() => {
-            hideStatus();
-            navigation.navigate('RegisterCourse');
-          }} 
-          style={CourseStyle.headerAddBtn}
-        >
-          <Ionicons name="add" size={28} color="#FFF" />
-        </TouchableOpacity>
+        
+        {user?.role === 'ADMIN' && (
+          <TouchableOpacity 
+            onPress={() => {
+              hideStatus();
+              navigation.navigate('RegisterCourse');
+            }} 
+            style={CourseStyle.headerAddBtn}
+          >
+            <Ionicons name="add" size={28} color="#FFF" />
+          </TouchableOpacity>
+        )}
       </View>
 
       <View style={CourseStyle.headerContent}>
@@ -166,21 +184,23 @@ export const CourseList = ({ navigation }: any) => {
                 </View>
               </View>
 
-              <View style={CourseStyle.actions}>
-                <TouchableOpacity 
-                  style={[CourseStyle.actionBtn, CourseStyle.editBtn]} 
-                  onPress={() => handleEdit(item)}
-                >
-                  <Ionicons name="pencil" size={18} color="#007AFF" />
-                </TouchableOpacity>
+              {user?.role === 'ADMIN' && (
+                <View style={CourseStyle.actions}>
+                  <TouchableOpacity 
+                    style={[CourseStyle.actionBtn, CourseStyle.editBtn]} 
+                    onPress={() => handleEdit(item)}
+                  >
+                    <Ionicons name="pencil" size={18} color="#007AFF" />
+                  </TouchableOpacity>
 
-                <TouchableOpacity 
-                  style={[CourseStyle.actionBtn, CourseStyle.deleteBtn]} 
-                  onPress={() => handleDelete(item.id)}
-                >
-                  <Ionicons name="trash" size={18} color="#FF3B30" />
-                </TouchableOpacity>
-              </View>
+                  <TouchableOpacity 
+                    style={[CourseStyle.actionBtn, CourseStyle.deleteBtn]} 
+                    onPress={() => handleDelete(item.id)}
+                  >
+                    <Ionicons name="trash" size={18} color="#FF3B30" />
+                  </TouchableOpacity>
+                </View>
+              )}
             </TouchableOpacity>
           )}
         />
