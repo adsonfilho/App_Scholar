@@ -129,9 +129,9 @@ async function main() {
   // ==========================================
   console.log('Inserting invitations, students and their grades...');
   const studentsData = [
-    { name: 'Adson Ottoni', email: 'adson.aluno@fatec.sp.gov.br', enrollment: '123456789', courseAcronym: 'DSM', phone: '12999999999', address: 'Av. Humberto de Alencar Castelo Branco', number: '250', neighborhood: 'Vila Branca', city: 'Jacareí', state: 'SP', zipCode: '12312300' },
-    { name: 'Lucas Gabriel Costa', email: 'lucas.aluno@fatec.sp.gov.br', enrollment: '987654321', courseAcronym: 'DSM', phone: '12988888888', address: 'Rua das Flores', number: '12', neighborhood: 'Centro', city: 'Jacareí', state: 'SP', zipCode: '12300000' },
-    { name: 'Mariana Souza Santos', email: 'mariana.aluna@fatec.sp.gov.br', enrollment: '456123789', courseAcronym: 'ADS', phone: '11977777777', address: 'Av. Paulista', number: '1000', neighborhood: 'Bela Vista', city: 'São Paulo', state: 'SP', zipCode: '01310100' }
+    { name: 'Adson Ottoni', email: 'adson.aluno@fatec.sp.gov.br', enrollment: '123456789', courseAcronym: 'DSM', phone: '12999999999', address: 'Av. Humberto de Alencar Castelo Branco', number: '250', neighborhood: 'Vila Branca', city: 'Jacareí', state: 'SP', zipCode: '12312-300' },
+    { name: 'Lucas Gabriel Costa', email: 'lucas.aluno@fatec.sp.gov.br', enrollment: '987654321', courseAcronym: 'DSM', phone: '12988888888', address: 'Rua das Flores', number: '12', neighborhood: 'Centro', city: 'Jacareí', state: 'SP', zipCode: '12300-000' },
+    { name: 'Mariana Souza Santos', email: 'mariana.aluna@fatec.sp.gov.br', enrollment: '456123789', courseAcronym: 'ADS', phone: '11977777777', address: 'Av. Paulista', number: '1000', neighborhood: 'Bela Vista', city: 'São Paulo', state: 'SP', zipCode: '01310-100' }
   ];
 
   for (const stu of studentsData) {

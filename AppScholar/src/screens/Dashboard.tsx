@@ -27,6 +27,7 @@ export const Dashboard = ({ navigation }: any) => {
 
         navigation.navigate('RegisterStudent', {
           student: {
+            user: { id: response.id },
             id: response.id,
             name: response.user?.name || response.name || '',
             email: response.user?.email || response.email || '',
