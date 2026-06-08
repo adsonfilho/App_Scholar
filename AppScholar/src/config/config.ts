@@ -1,6 +1,6 @@
 export const API_CONFIG = {
-  BASE_URL: process.env.BASE_URL,
-  VIA_CEP_URL: process.env.VIA_CEP_URL
+  BASE_URL: process.env.EXPO_PUBLIC_BASE_URL,
+  VIA_CEP_URL: process.env.EXPO_PUBLIC_VIA_CEP_URL,
 };
 
 export const UI_SETTINGS = {

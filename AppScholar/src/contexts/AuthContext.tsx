@@ -46,6 +46,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const response = await api.post('/auth/login', { email, password });
       
       const { token: jwtToken, user: userData } = response.data;
+      if (!jwtToken || !userData) {
+        throw new Error('Resposta de autenticação inválida.');
+      }
 
       setUser(userData);
       setToken(jwtToken);
@@ -54,8 +57,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       await AsyncStorage.setItem('@AppScholar:user', JSON.stringify(userData));
       await AsyncStorage.setItem('@AppScholar:token', jwtToken);
-    } catch (error) {
-      throw new Error('E-mail ou senha inválidos.');
+    } catch (error: any) {
+      throw new Error(error);
     }
   }
 
