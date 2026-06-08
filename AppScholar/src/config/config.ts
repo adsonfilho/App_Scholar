@@ -1,6 +1,6 @@
 export const API_CONFIG = {
-  BASE_URL: 'http://localhost:3000/api', 
-  VIA_CEP_URL: 'https://viacep.com.br/ws'
+  BASE_URL: process.env.BASE_URL,
+  VIA_CEP_URL: process.env.VIA_CEP_URL
 };
 
 export const UI_SETTINGS = {
