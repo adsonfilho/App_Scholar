@@ -3,7 +3,6 @@ import api from './apiService';
 class ProfessorService {
     async getProfessors() {
         try {
-            console.log('Fetching professors from API...');
             const response = await api.get('/professors');
             return response.data;
         }
@@ -24,7 +23,19 @@ class ProfessorService {
         }
     }
 
-    async updateProfessor(id: string, professorData: any) {
+    async getSubjectsByProfessor(userId: number) {
+        try {
+            console.log('Fetching subjects for professor with userId:', userId);
+            const response = await api.get(`/professors/${userId}/subjects`);
+            return response.data;
+        }
+        catch (error) {
+            console.error('Error fetching subjects for professor:', error);
+            throw error;
+        }
+    }
+
+    async updateProfessor(id: number, professorData: any) {
         try {
             const response = await api.put(`/professors/${id}`, professorData);
             return response.data;

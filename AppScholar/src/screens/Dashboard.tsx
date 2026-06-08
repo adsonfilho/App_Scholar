@@ -67,6 +67,14 @@ export const Dashboard = ({ navigation }: any) => {
                   iconColor="#FF9500"
                   onPress={() => navigation.navigate('Course')}
                 />
+
+                <MenuItem 
+                  title="Lançar Notas" 
+                  description="Selecione uma disciplina e gerencie as notas dos alunos." 
+                  iconName="pencil-sharp" 
+                  iconColor="#AF52DE"
+                  onPress={() => navigation.navigate('TeacherGrades')}
+                />
               </>
             )}
 
@@ -85,7 +93,13 @@ export const Dashboard = ({ navigation }: any) => {
               description="Acompanhe notas e médias para conferir o desempenho e a situação final." 
               iconName="stats-chart-outline" 
               iconColor="#34C759"
-              onPress={() => navigation.navigate('StudentReport')}
+              onPress={() => {
+                if (user?.role === 'STUDENT') {
+                  navigation.navigate('StudentReport');
+                } else {
+                  navigation.navigate('StudentListReport');
+                }
+              }}
             />
 
           </View>

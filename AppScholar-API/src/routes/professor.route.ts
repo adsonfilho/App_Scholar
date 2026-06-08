@@ -9,5 +9,6 @@ router.get('/:userId', ensureAuthenticated as any, professorController.getProfes
 router.post('/', professorController.createProfessor);
 router.put('/:userId', ensureAuthenticated as any, professorController.updateProfessor as any);
 router.delete('/:userId', ensureAuthenticated as any, professorController.deleteProfessor as any);
+router.get('/:userId/subjects', ensureAuthenticated as any, professorController.getSubjectsByUserId as any);
 
 export default router;

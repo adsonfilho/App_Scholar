@@ -144,7 +144,6 @@ export const CourseList = ({ navigation }: any) => {
                 </View>
               </View>
 
-              {/* Botões de Ação mantidos à direita de forma independente */}
               <View style={CourseStyle.actions}>
                 <TouchableOpacity 
                   style={[CourseStyle.actionBtn, CourseStyle.editBtn]} 

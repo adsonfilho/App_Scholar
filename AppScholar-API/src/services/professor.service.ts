@@ -35,6 +35,10 @@ class ProfessorService {
         return professorRepository.findAll();
     }
 
+    public async findSubjectsByUserId(userId: number) {
+        return professorRepository.findSubjectsByUserId(userId);
+    }
+
     public async updateByUserId(userId: number, data: UpdateProfessorDTO) {
         return professorRepository.updateByUserId(userId, data);
     }

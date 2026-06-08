@@ -40,6 +40,14 @@ class StudentService{
         return studentRepository.findAll();
     }
 
+    public async findByUserIdWithGrades(userId: number){
+        return studentRepository.findByUserIdWithGrades(userId);
+    }
+
+    public async findStudentsByCourseId(courseId: number) {
+        return studentRepository.findStudentsByCourseId(courseId);
+    }
+
     public async updateByUserId(userId: number, data: UpdateStudentDTO){
         
         const student = updateStudentSchema.parse(data); 

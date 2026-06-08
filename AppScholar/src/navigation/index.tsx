@@ -16,6 +16,8 @@ import { RegisterSubject } from '../screens/RegisterSubjects';
 
 import { StudentReport } from '../screens/StudentReport';
 import { RegisterInvitation } from '../screens/RegisterInvitation';
+import { StudentListReport } from '../screens/StudentListReport';
+import { TeacherGrades } from '../screens/TeacherGrades'; 
 
 const Stack = createStackNavigator();
 
@@ -41,7 +43,7 @@ export const AppRoutes = () => {
       ) : (
         <>
           <Stack.Screen name="Dashboard" component={Dashboard} />
-          <Stack.Screen name="StudentReport" component={StudentReport} />
+          <Stack.Screen name="StudentReport" component={StudentReport} /> 
 
           {user?.role !== 'STUDENT' && (
             <>
@@ -52,6 +54,8 @@ export const AppRoutes = () => {
               <Stack.Screen name="Course" component={CourseList} />
               <Stack.Screen name="CourseDetails" component={CourseDetails} />
               
+              <Stack.Screen name="StudentListReport" component={StudentListReport} />
+              <Stack.Screen name="TeacherGrades" component={TeacherGrades} />
             </>
           )}
 

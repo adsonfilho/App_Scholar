@@ -47,6 +47,17 @@ class ProfessorRepository {
         });
     };
 
+    public async findSubjectsByUserId(userId: number) {
+        return prisma.professor.findUniqueOrThrow({
+            where: {
+                userId: userId,
+            },
+            include: {
+                subjects: true,
+            },
+        });
+    }
+
     public async updateByUserId(userId: number, data: UpdateProfessorDTO) {
         return prisma.user.update({
             where: {

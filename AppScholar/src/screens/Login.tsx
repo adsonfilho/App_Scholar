@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, TextInput, Text, TouchableOpacity } from 'react-native';
+import { View, TextInput, Text, TouchableOpacity, ActivityIndicator } from 'react-native'; 
 import { useNavigation } from '@react-navigation/native';
 import { useStatus } from '../hooks/useStatus';
 import { StatusMessage } from '../components/StatusMessage';
@@ -13,6 +13,7 @@ export const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
+  const [loadingLogin, setLoadingLogin] = useState(false);
 
   const { status, showStatus, hideStatus } = useStatus();
   const { login } = useAuth();
@@ -30,10 +31,13 @@ export const Login = () => {
     }
 
     try {
+      setLoadingLogin(true); 
       await login(email, password);
       showStatus("Bem-vindo ao App Scholar!", "success");
     } catch (error: any) {
       showStatus(error.message || "E-mail ou senha incorretos.", "error");
+    } finally {
+      setLoadingLogin(false); 
     }
   };
 
@@ -56,6 +60,7 @@ export const Login = () => {
         onChangeText={setEmail}
         autoCapitalize="none"
         keyboardType="email-address"
+        editable={!loadingLogin} 
       />
 
       <TextInput
@@ -64,17 +69,27 @@ export const Login = () => {
         value={password}
         onChangeText={setPassword}
         secureTextEntry
+        editable={!loadingLogin} 
       />
 
-      <TouchableOpacity onPress={handleLogin} style={LoginStyle.primaryBtn}>
-        <Text style={LoginStyle.primaryBtnText}>Entrar</Text>
+      <TouchableOpacity 
+        onPress={handleLogin} 
+        style={[LoginStyle.primaryBtn, loadingLogin && { opacity: 0.8 }]}
+        disabled={loadingLogin} 
+      >
+        {loadingLogin ? (
+          <ActivityIndicator size="small" color="#FFF" /> 
+        ) : (
+          <Text style={LoginStyle.primaryBtnText}>Entrar</Text>
+        )}
       </TouchableOpacity>
 
       <TouchableOpacity
         onPress={() => setModalVisible(true)}
         style={LoginStyle.secondaryBtn}
+        disabled={loadingLogin}
       >
-        <Text style={LoginStyle.secondaryBtnText}>Novo Cadastro</Text>
+        <Text style={LoginStyle.secondaryBtnText}>Primeiro acesso? Clique aqui</Text>
       </TouchableOpacity>
 
       <SelectUserTypeModal

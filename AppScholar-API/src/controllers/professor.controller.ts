@@ -32,6 +32,16 @@ class ProfessorController {
         }
     }
 
+    public async getSubjectsByUserId(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try {
+            const userId = Number(req.params.userId);
+            const subjects = await professorService.findSubjectsByUserId(userId);
+            res.status(200).json(subjects);
+        } catch (error) {
+            next(error);
+        }
+    }
+
     public async updateProfessor(req: AuthRequest, res: Response, next: NextFunction): Promise<void | Response<any>> {
         try {
 

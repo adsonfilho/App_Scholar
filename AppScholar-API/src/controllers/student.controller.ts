@@ -32,6 +32,28 @@ class StudentController {
             next(error);
         }
     }
+
+    public async getStudentWithGrades(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try {
+            const userId = Number(req.params.userId);
+            const student = await studentService.findByUserIdWithGrades(userId);
+            res.status(200).json(student);
+        }
+        catch (error) {
+            next(error);
+        }
+    }
+
+    public async getStudentsByCourseId(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try {
+            const courseId = Number(req.params.courseId);
+            const students = await studentService.findStudentsByCourseId(courseId);
+            res.status(200).json(students);
+        }
+        catch (error) {
+            next(error);
+        }
+    }
     
     public async updateStudent(req: AuthRequest, res: Response, next: NextFunction): Promise<void | Response<any>> {
         try {

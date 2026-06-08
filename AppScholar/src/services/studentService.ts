@@ -34,6 +34,31 @@ class StudentService {
         }
     }
 
+    async getStudentReport(userId: number) {
+        try {
+            const response = await api.get(`/students/${userId}/report`);
+
+            console.log(`Relatório do estudante com ID ${userId} recebido:`, response.data);
+            return response.data;
+        }
+        catch (error) {
+            console.error(`Erro ao buscar relatório do estudante com ID ${userId}:`, error);
+            throw error;
+        }
+    }
+
+    async getStudentsByCourseId(courseId: number) {
+        try {
+            const response = await api.get(`/students/course/${courseId}`);
+            console.log(`Estudantes do curso com ID ${courseId} recebidos:`, response.data);
+            return response.data;
+        }
+        catch (error) {
+            console.error(`Erro ao buscar estudantes do curso com ID ${courseId}:`, error);
+            throw error;
+        }
+    }
+
     async updateStudent(id: number, studentData: any) {
         try {
             console.log('Atualizando estudante com ID:', id, 'Dados:', studentData);
