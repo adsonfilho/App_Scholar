@@ -22,7 +22,7 @@ export const Dashboard = ({ navigation }: any) => {
     try {
       if (user.role === 'STUDENT') {
 
-        const id = 5
+        const id = user.id;
         const response = await studentService.getStudentById(id);
 
         navigation.navigate('RegisterStudent', {
