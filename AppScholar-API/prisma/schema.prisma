@@ -16,6 +16,7 @@ model User {
   updatedAt DateTime   @updatedAt @map("updated_at")
   professor Professor?
   student   Student?
+  alerts    Alert[]
 
   @@map("users")
 }
@@ -134,6 +135,18 @@ model UserInvitation {
   course     Course?   @relation(fields: [courseId], references: [id])
 
   @@map("user_invitations")
+}
+
+model Alert {
+  id          Int      @id @default(autoincrement())
+  title       String
+  content     String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  userId      Int
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("alerts")
 }
 
 enum Role {

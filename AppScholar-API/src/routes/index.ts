@@ -8,6 +8,7 @@ import degreeRoutes from './degree.route';
 import gradeRoutes from './grade.route';
 import authRoutes from './auth.route';
 import fieldRoutes from './field.route';
+import alertRoutes from './alert.route';
 import { ensureAuthenticated } from '../middlewares/auth.middleware';
 
 const router = Router();
@@ -22,5 +23,6 @@ router.use('/courses', ensureAuthenticated as any, courseRoutes);
 router.use('/degrees', degreeRoutes);
 router.use('/grades', ensureAuthenticated as any, gradeRoutes);
 router.use('/fields', fieldRoutes);
+router.use('/alert', ensureAuthenticated as any, alertRoutes)
 
 export default router;

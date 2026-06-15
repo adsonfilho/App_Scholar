@@ -97,7 +97,7 @@ npx expo start --clear
 
 ## 🔑 Usuários de Teste
 
-Senha padrão: `Senha@123`
+Senha padrão: `senha@123`
 
 | Perfil    | E-mail                                                              |
 | --------- | ------------------------------------------------------------------- |

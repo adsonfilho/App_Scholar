@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { MenuItemStyle } from '../styles/MenuItemStyle';
 
@@ -9,6 +9,7 @@ interface MenuItemProps {
   iconName: keyof typeof Ionicons.glyphMap;
   iconColor: string;
   onPress: () => void;
+  badge?: boolean; 
 }
 
 export const MenuItem: React.FC<MenuItemProps> = ({ 
@@ -16,7 +17,8 @@ export const MenuItem: React.FC<MenuItemProps> = ({
   description, 
   iconName, 
   iconColor, 
-  onPress 
+  onPress,
+  badge = false
 }) => {
   return (
     <TouchableOpacity 
@@ -24,8 +26,12 @@ export const MenuItem: React.FC<MenuItemProps> = ({
       activeOpacity={0.7} 
       onPress={onPress}
     >
-      <View style={[MenuItemStyle.iconContainer, { backgroundColor: iconColor + '15' }]}>
-        <Ionicons name={iconName} size={26} color={iconColor} />
+      <View style={{ position: 'relative' }}>
+        <View style={[MenuItemStyle.iconContainer, { backgroundColor: iconColor + '15' }]}>
+          <Ionicons name={iconName} size={26} color={iconColor} />
+        </View>
+        
+        {badge && <View style={styles.redDot} />}
       </View>
       
       <View style={MenuItemStyle.content}>
@@ -38,3 +44,16 @@ export const MenuItem: React.FC<MenuItemProps> = ({
   );
 };
 
+const styles = StyleSheet.create({
+  redDot: {
+    position: 'absolute',
+    top: -2,
+    right: -2,
+    backgroundColor: '#FF3B30', 
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    borderWidth: 2,
+    borderColor: '#FFF',
+  }
+});

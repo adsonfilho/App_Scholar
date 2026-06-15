@@ -1,15 +1,45 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, Platform, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { useIsFocused } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 import { MenuItem } from '../components/MenuItem';
 import { useAuth } from '../contexts/AuthContext'; 
-import {studentService} from '../services/studentService';
-import {professorService} from '../services/professorService';
+import { studentService } from '../services/studentService';
+import { professorService } from '../services/professorService';
+import { alertService } from '../services/alertService';
 
 export const Dashboard = ({ navigation }: any) => {
   const { user, logout } = useAuth();
+  const isFocused = useIsFocused();
   const [loadingProfile, setLoadingProfile] = useState(false); 
+  const [hasUnread, setHasUnread] = useState(false);
+
+  useEffect(() => {
+    if (isFocused) {
+      checkNewAlerts();
+    }
+  }, [isFocused]);
+
+  const checkNewAlerts = async () => {
+    try {
+      const lastCheck = await AsyncStorage.getItem('@last_alert_check');
+      const alerts = await alertService.getAlerts();
+      
+      if (alerts && alerts.length > 0) {
+        const newestAlert = new Date(alerts[0].createdAt).getTime();
+        const lastViewed = lastCheck ? new Date(lastCheck).getTime() : 0;
+        
+        setHasUnread(newestAlert > lastViewed);
+      } else {
+        setHasUnread(false);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   const handleLogout = () => {
     logout();
@@ -21,7 +51,6 @@ export const Dashboard = ({ navigation }: any) => {
     setLoadingProfile(true);
     try {
       if (user.role === 'STUDENT') {
-
         const id = user.id;
         const response = await studentService.getStudentById(id);
 
@@ -90,6 +119,15 @@ export const Dashboard = ({ navigation }: any) => {
             </View>
 
             <Text style={styles.sectionTitle}>Módulos de Gestão</Text>
+ 
+            <MenuItem 
+              title="Mural de Avisos" 
+              description="Confira comunicados importantes, avisos e notificações gerais da instituição." 
+              iconName="megaphone-outline" 
+              iconColor="#FF9500"
+              onPress={() => navigation.navigate('AlertScreen')}
+              badge={hasUnread} 
+            />
 
             {(user?.role === 'STUDENT' || user?.role === 'PROFESSOR') && (
               <View style={{ position: 'relative' }}>
@@ -198,5 +236,17 @@ const styles = StyleSheet.create({
       web: { boxShadow: '0px 2px 4px rgba(0,0,0,0.1)', cursor: 'pointer' }
     })
   },
-  sectionTitle: { fontSize: 13, fontWeight: '700', color: '#8E8E93', textTransform: 'uppercase', marginBottom: 15, marginLeft: 5 }
+  sectionTitle: { fontSize: 13, fontWeight: '700', color: '#8E8E93', textTransform: 'uppercase', marginBottom: 15, marginLeft: 5 },
+  badge: {
+    position: 'absolute',
+    top: 22,
+    left: 42,
+    backgroundColor: '#FF3B30',
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    borderWidth: 2,
+    borderColor: '#FFF',
+    zIndex: 10
+  }
 });
